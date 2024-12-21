@@ -31,15 +31,27 @@ function connect(event) {
     event.preventDefault();
 }
 
+function getCurrentDateTime() {
+    var now = new Date();
+
+    // Formater la date au format YYYY-MM-DD
+    var date = now.toISOString().split('T')[0]; // Partie date de la ISO 8601 (YYYY-MM-DD)
+
+    // Formater l'heure au format HH:mm
+    var time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0'); // HH:mm
+    return { date: date, time: time };
+}
+
 
 function onConnected() {
     // Subscribe to the Public Topic
+
     stompClient.subscribe('/topic/public', onMessageReceived);
 
     // Tell your username to the server
     stompClient.send("/app/chat.addUser",
         {},
-        JSON.stringify({sender: username, type: 'JOIN'})
+        JSON.stringify({sender: username, type: 'JOIN', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
     )
 
     connectingElement.classList.add('hidden');
@@ -52,23 +64,30 @@ function onError(error) {
 }
 
 
+
+
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
     if (messageContent && stompClient) {
-        var now = new Date();
+        // Appeler la fonction pour obtenir la date et l'heure formatées
+        var { date, time } = getCurrentDateTime();
+
         var chatMessage = {
             sender: username,
             content: messageInput.value,
             type: 'CHAT',
-            recipient: 'JohnDoe',
-            // Envoi de la date au format YYYY-MM-DD
-            date: now.toISOString().split('T')[0],  // Partie date de la ISO 8601 (YYYY-MM-DD)
-            // Envoi de l'heure et des minutes au format HH:mm
-            time: now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0')  // HH:mm
+            recipient: 'JohnDoe', // Remplace par le destinataire réel
+            date: date,  // Date au format YYYY-MM-DD
+            time: time   // Heure au format HH:mm
         };
-        console.log(chatMessage)
+
+        console.log(chatMessage);
+
+        // Envoi des messages via WebSocket
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
         stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(chatMessage));
+
+        // Réinitialisation du champ message
         messageInput.value = '';
     }
     event.preventDefault();
