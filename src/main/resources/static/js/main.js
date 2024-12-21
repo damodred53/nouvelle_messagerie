@@ -54,12 +54,19 @@ function onError(error) {
 
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
-    if(messageContent && stompClient) {
+    if (messageContent && stompClient) {
+        var now = new Date();
         var chatMessage = {
             sender: username,
             content: messageInput.value,
-            type: 'CHAT'
+            type: 'CHAT',
+            recipient: 'JohnDoe',
+            // Envoi de la date au format YYYY-MM-DD
+            date: now.toISOString().split('T')[0],  // Partie date de la ISO 8601 (YYYY-MM-DD)
+            // Envoi de l'heure et des minutes au format HH:mm
+            time: now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0')  // HH:mm
         };
+        console.log(chatMessage)
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }
@@ -90,8 +97,19 @@ function onMessageReceived(payload) {
 
         var usernameElement = document.createElement('span');
         var usernameText = document.createTextNode(message.sender);
+        var dateElement = document.createElement('span');
+        var dateText = document.createTextNode(message.date);
+        var timeElement = document.createElement('span');
+        var timeText = document.createTextNode(message.time);
+        
         usernameElement.appendChild(usernameText);
         messageElement.appendChild(usernameElement);
+
+        timeElement.appendChild(dateText);
+        messageElement.appendChild(dateElement);
+
+        timeElement.appendChild(timeText);
+        messageElement.appendChild(timeElement);
     }
 
     var textElement = document.createElement('p');

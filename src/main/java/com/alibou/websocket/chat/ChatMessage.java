@@ -1,6 +1,8 @@
 package com.alibou.websocket.chat;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import lombok.*;
 
@@ -15,6 +17,7 @@ public class ChatMessage {
     private String content;
     private String sender;
     private String recipient;
-    private LocalDateTime timestamp;
+    private LocalDate date;
+    private LocalTime time;
 
 }
