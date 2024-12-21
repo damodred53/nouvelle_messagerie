@@ -1,6 +1,6 @@
 package com.alibou.websocket.config;
 
-import com.alibou.websocket.chat.ChatMessage;
+import com.alibou.websocket.chat.Models.ChatMessage;
 import com.alibou.websocket.chat.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

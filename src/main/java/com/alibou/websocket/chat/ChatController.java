@@ -1,6 +1,7 @@
 package com.alibou.websocket.chat;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,12 +15,18 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import com.alibou.websocket.chat.Models.ChatMessage;
+import com.alibou.websocket.chat.Repository.MessageRepository;
+
 @Controller
 public class ChatController {
 
     // Injection de SimpMessagingTemplate pour envoyer des messages via WebSocket
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private MessageRepository messageRepository; // Injection du repository
 
     private Set<String> activeUsers = ConcurrentHashMap.newKeySet();
 
@@ -46,46 +53,60 @@ public class ChatController {
         // Envoyer le message directement au destinataire via WebSocket
         String recipient = chatMessage.getRecipient();
         if (recipient != null) {
+            saveMessage(chatMessage);
             // Envoyer le message uniquement au destinataire
             String destination = "/queue/private/" + recipient;
             messagingTemplate.convertAndSendToUser(recipient, destination, chatMessage);
         }
     }
 
-    @MessageMapping("/chat.addUser")
-    @SendTo("/topic/public")
-    public ChatMessage addUser(
-            @Payload ChatMessage chatMessage,
-            SimpMessageHeaderAccessor headerAccessor) {
-        // Ajouter l'utilisateur à la session et à la liste des utilisateurs actifs
-        String username = chatMessage.getSender();
-        headerAccessor.getSessionAttributes().put("username", username);
-        activeUsers.add(username);
+    // Sauvegarde d'un message dans la base de données
+    private void saveMessage(ChatMessage chatMessage) {
+        // Construire l'entité Message à partir de ChatMessage
+        ChatMessage message = new ChatMessage(
+                chatMessage.getSender(),
+                chatMessage.getRecipient(),
+                chatMessage.getContent(),
+                LocalDate.now(), // Date du message
+                LocalTime.now() // Heure du message
+        );
 
-        // Retourner un message de bienvenue
-        return ChatMessage.builder()
-                .type(MessageType.JOIN)
-                .sender(username)
-                .content("has joined the chat!")
-                .timestamp(LocalDateTime.now())
-                .build();
+        // Sauvegarder dans la base de données
+        messageRepository.save(message);
     }
 
-    @MessageMapping("/chat.removeUser")
-    @SendTo("/topic/public")
-    public ChatMessage removeUser(
-            @Payload ChatMessage chatMessage,
-            SimpMessageHeaderAccessor headerAccessor) {
-        // Supprimer l'utilisateur de la liste des utilisateurs actifs
-        String username = chatMessage.getSender();
-        activeUsers.remove(username);
+    // @MessageMapping("/chat.addUser")
+    // @SendTo("/topic/public")
+    // public ChatMessage addUser(
+    // @Payload ChatMessage chatMessage,
+    // SimpMessageHeaderAccessor headerAccessor) {
+    // // Ajouter l'utilisateur à la session et à la liste des utilisateurs actifs
+    // String username = chatMessage.getSender();
+    // headerAccessor.getSessionAttributes().put("username", username);
+    // activeUsers.add(username);
 
-        // Retourner un message indiquant que l'utilisateur a quitté
-        return ChatMessage.builder()
-                .type(MessageType.LEAVE)
-                .sender(username)
-                .content("has left the chat!")
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
+    // // Retourner un message de bienvenue
+    // return ChatMessage.builder()
+    // .type(MessageType.JOIN)
+    // .sender(username)
+    // .content("has joined the chat!")
+    // .build();
+    // }
+
+    // @MessageMapping("/chat.removeUser")
+    // @SendTo("/topic/public")
+    // public ChatMessage removeUser(
+    // @Payload ChatMessage chatMessage,
+    // SimpMessageHeaderAccessor headerAccessor) {
+    // // Supprimer l'utilisateur de la liste des utilisateurs actifs
+    // String username = chatMessage.getSender();
+    // activeUsers.remove(username);
+
+    // // Retourner un message indiquant que l'utilisateur a quitté
+    // return ChatMessage.builder()
+    // .type(MessageType.LEAVE)
+    // .sender(username)
+    // .content("has left the chat!")
+    // .build();
+    // }
 }
