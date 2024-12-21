@@ -53,6 +53,7 @@ public class ChatController {
         // Envoyer le message directement au destinataire via WebSocket
         String recipient = chatMessage.getRecipient();
         if (recipient != null) {
+            System.out.println("recipient: " + recipient);
             saveMessage(chatMessage);
             // Envoyer le message uniquement au destinataire
             String destination = "/queue/private/" + recipient;
@@ -70,7 +71,6 @@ public class ChatController {
                 LocalDate.now(), // Date du message
                 LocalTime.now() // Heure du message
         );
-
         // Sauvegarder dans la base de données
         messageRepository.save(message);
     }

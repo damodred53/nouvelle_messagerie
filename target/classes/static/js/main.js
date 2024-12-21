@@ -68,6 +68,7 @@ function sendMessage(event) {
         };
         console.log(chatMessage)
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+        stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }
     event.preventDefault();
