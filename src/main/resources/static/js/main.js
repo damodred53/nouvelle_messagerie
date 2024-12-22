@@ -7,6 +7,7 @@ var messageForm = document.querySelector('#messageForm');
 var messageInput = document.querySelector('#message');
 var messageArea = document.querySelector('#messageArea');
 var connectingElement = document.querySelector('.connecting');
+var disconnect_button = document.querySelector('.disconnect_button');
 
 var stompClient = null;
 var username = null;
@@ -15,6 +16,9 @@ var colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
 ];
+
+// Ajouter l'écouteur d'événement pour la fermeture de la fenêtre
+disconnect_button.addEventListener('click', onDisconnected, true);
 
 function connect(event) {
     username = document.querySelector('#name').value.trim();
@@ -31,18 +35,47 @@ function connect(event) {
     event.preventDefault();
 }
 
+function getCurrentDateTime() {
+    var now = new Date();
+
+    // Formater la date au format YYYY-MM-DD
+    var date = now.toISOString().split('T')[0]; // Partie date de la ISO 8601 (YYYY-MM-DD)
+
+    // Formater l'heure au format HH:mm
+    var time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0'); // HH:mm
+    return { date: date, time: time };
+}
+
 
 function onConnected() {
     // Subscribe to the Public Topic
+
     stompClient.subscribe('/topic/public', onMessageReceived);
 
     // Tell your username to the server
     stompClient.send("/app/chat.addUser",
         {},
-        JSON.stringify({sender: username, type: 'JOIN'})
+        JSON.stringify({sender: username, type: 'JOIN', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
     )
 
     connectingElement.classList.add('hidden');
+}
+
+function onDisconnected() {
+    // Informer le serveur que l'utilisateur quitte
+    stompClient.send("/chat.removeUser",
+        {},
+        JSON.stringify({sender: username, type: 'LEAVE', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
+    );
+
+    // Déconnexion de la WebSocket
+    stompClient.disconnect(function() {
+        console.log("Disconnected");
+        // Cacher la page de chat et afficher à nouveau la page de connexion
+        chatPage.classList.add('hidden');
+        usernamePage.classList.remove('hidden');
+        connectingElement.classList.add('hidden');
+    });
 }
 
 
@@ -52,22 +85,30 @@ function onError(error) {
 }
 
 
+
+
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
     if (messageContent && stompClient) {
-        var now = new Date();
+        // Appeler la fonction pour obtenir la date et l'heure formatées
+        var { date, time } = getCurrentDateTime();
+
         var chatMessage = {
             sender: username,
             content: messageInput.value,
             type: 'CHAT',
-            recipient: 'JohnDoe',
-            // Envoi de la date au format YYYY-MM-DD
-            date: now.toISOString().split('T')[0],  // Partie date de la ISO 8601 (YYYY-MM-DD)
-            // Envoi de l'heure et des minutes au format HH:mm
-            time: now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0')  // HH:mm
+            recipient: 'JohnDoe', // Remplace par le destinataire réel
+            date: date,  // Date au format YYYY-MM-DD
+            time: time   // Heure au format HH:mm
         };
-        console.log(chatMessage)
+
+        console.log(chatMessage);
+
+        // Envoi des messages via WebSocket
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+        stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(chatMessage));
+
+        // Réinitialisation du champ message
         messageInput.value = '';
     }
     event.preventDefault();
@@ -76,16 +117,10 @@ function sendMessage(event) {
 
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
-
+    console.log("voici le message : ", payload);
     var messageElement = document.createElement('li');
 
-    if(message.type === 'JOIN') {
-        messageElement.classList.add('event-message');
-        message.content = message.sender + ' joined!';
-    } else if (message.type === 'LEAVE') {
-        messageElement.classList.add('event-message');
-        message.content = message.sender + ' left!';
-    } else {
+    
         messageElement.classList.add('chat-message');
 
         var avatarElement = document.createElement('i');
@@ -110,7 +145,7 @@ function onMessageReceived(payload) {
 
         timeElement.appendChild(timeText);
         messageElement.appendChild(timeElement);
-    }
+    
 
     var textElement = document.createElement('p');
     var messageText = document.createTextNode(message.content);
