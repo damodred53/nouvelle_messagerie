@@ -16,7 +16,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.alibou.websocket.chat.Models.ChatMessage;
+import com.alibou.websocket.chat.Models.Utilisateur;
 import com.alibou.websocket.chat.Repository.MessageRepository;
+import com.alibou.websocket.chat.Repository.UtilisateurRepository;
 
 @Controller
 public class ChatController {
@@ -26,7 +28,10 @@ public class ChatController {
     private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    private MessageRepository messageRepository; // Injection du repository
+    private MessageRepository messageRepository;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
 
     private Set<String> activeUsers = ConcurrentHashMap.newKeySet();
 
@@ -87,6 +92,7 @@ public class ChatController {
         headerAccessor.getSessionAttributes().put("username", username);
         activeUsers.add(username);
 
+        saveUser(username);
         // Retourner un message de bienvenue
         return ChatMessage.builder()
                 .type(MessageType.JOIN)
@@ -95,6 +101,16 @@ public class ChatController {
                 .time(timeUserName)
                 .content("est dans la conversation !!")
                 .build();
+    }
+
+    private void saveUser(String username) {
+
+        Utilisateur userToSave = new Utilisateur();
+        userToSave.setUsername(username);
+
+        utilisateurRepository.save(userToSave);
+        // Construire l'entité Message à partir de ChatMessage
+
     }
 
     @MessageMapping("/chat.removeUser")
