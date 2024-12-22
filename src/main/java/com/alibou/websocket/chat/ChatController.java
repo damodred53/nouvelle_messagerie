@@ -102,6 +102,7 @@ public class ChatController {
     public ChatMessage removeUser(
             @Payload ChatMessage chatMessage,
             SimpMessageHeaderAccessor headerAccessor) {
+        System.out.println(chatMessage);
         // Supprimer l'utilisateur de la liste des utilisateurs actifs
         String username = chatMessage.getSender();
         LocalDate dateUserName = chatMessage.getDate();

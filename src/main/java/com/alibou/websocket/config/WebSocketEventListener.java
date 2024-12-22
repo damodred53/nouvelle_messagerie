@@ -4,6 +4,12 @@ import com.alibou.websocket.chat.Models.ChatMessage;
 import com.alibou.websocket.chat.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -22,11 +28,17 @@ public class WebSocketEventListener {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String username = (String) headerAccessor.getSessionAttributes().get("username");
         if (username != null) {
+
+            LocalTime formattedTime = LocalTime.now().withSecond(0).withNano(0);
             log.info("user disconnected: {}", username);
             var chatMessage = ChatMessage.builder()
                     .type(MessageType.LEAVE)
+                    .date(LocalDate.now())
+                    .time(formattedTime)
+                    .content(username + "a quitté la conversation")
                     .sender(username)
                     .build();
+            log.info("user disconnected: {}", chatMessage);
             messagingTemplate.convertAndSend("/topic/public", chatMessage);
         }
     }
