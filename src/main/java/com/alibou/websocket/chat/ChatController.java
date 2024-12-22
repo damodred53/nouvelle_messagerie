@@ -93,7 +93,7 @@ public class ChatController {
                 .sender(username)
                 .date(dateUserName)
                 .time(timeUserName)
-                .content("has joined the chat!")
+                .content("est dans la conversation !!")
                 .build();
     }
 
