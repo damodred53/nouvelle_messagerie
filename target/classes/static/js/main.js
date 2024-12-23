@@ -85,6 +85,8 @@ function generateConversationId(sender, recipient) {
     return sender.localeCompare(recipient) < 0
         ? `${sender}_${recipient}`
         : `${recipient}_${sender}`;
+
+        
 }
 
 function onDisconnected() {
