@@ -48,7 +48,7 @@ public class ChatMessage {
 
     private String generateConversationId(String sender, String recipient) {
         // Ensure consistent ordering to guarantee a unique ID
-        return (sender.compareTo(recipient) < 0) ? sender + "_" + recipient : recipient + "_" + sender;
+        return (sender.compareToIgnoreCase(recipient) < 0) ? sender + "_" + recipient : recipient + "_" + sender;
     }
 
     public static class ChatMessageBuilder {

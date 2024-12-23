@@ -3,6 +3,7 @@ package com.alibou.websocket.chat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -107,6 +108,16 @@ public class ChatController {
 
         Utilisateur userToSave = new Utilisateur();
         userToSave.setUsername(username);
+
+        // Optional<Utilisateur> existingUser =
+        // utilisateurRepository.findByUsername(username);
+
+        // if (existingUser.isPresent()) {
+        // // Si l'utilisateur existe déjà, vous pouvez soit le refuser, soit l'ignorer
+        // System.out.println("Utilisateur déjà existant avec le username : " +
+        // username);
+        // return; // Ne pas enregistrer le même utilisateur
+        // }
 
         utilisateurRepository.save(userToSave);
         // Construire l'entité Message à partir de ChatMessage

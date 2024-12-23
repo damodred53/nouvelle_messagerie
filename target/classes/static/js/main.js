@@ -1,5 +1,8 @@
 'use strict';
 
+import  createDropdownMenu  from './dropdownMenu.js';
+import { getAllUsers } from './services.js';
+
 var usernamePage = document.querySelector('#username-page');
 var chatPage = document.querySelector('#chat-page');
 var usernameForm = document.querySelector('#usernameForm');
@@ -11,16 +14,30 @@ var disconnect_button = document.querySelector('.disconnect_button');
 
 var stompClient = null;
 var username = null;
+let selectedUsername = null;
 
 var colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
 ];
 
-// Ajouter l'écouteur d'événement pour la fermeture de la fenêtre
-disconnect_button.addEventListener('click', onDisconnected, true);
+window.addEventListener('DOMContentLoaded', async () => {
+    const allUsers = await getAllUsers();
+    const menuContainer = document.getElementById('menu-container'); // Assurez-vous que cet élément existe dans votre HTML
+    const dropdownMenu = await createDropdownMenu(allUsers, (secondPersonName) => {
+        selectedUsername = secondPersonName;
+        console.log('Utilisateur sélectionné (callback dans main.js):', selectedUsername);
+    });
+    menuContainer.appendChild(dropdownMenu.dropdown);
+    
+});
+
+
+// // Ajouter l'écouteur d'événement pour la fermeture de la fenêtre
+// disconnect_button.addEventListener('click', onDisconnected, true);
 
 function connect(event) {
+    console.log(event);
     username = document.querySelector('#name').value.trim();
 
     if(username) {
@@ -28,7 +45,7 @@ function connect(event) {
         chatPage.classList.remove('hidden');
 
         var socket = new SockJS('/ws');
-        stompClient = Stomp.over(socket);
+        stompClient = Stomp.over(socket); 
 
         stompClient.connect({}, onConnected, onError);
     }
@@ -49,16 +66,25 @@ function getCurrentDateTime() {
 
 function onConnected() {
     // Subscribe to the Public Topic
-
     stompClient.subscribe('/topic/public', onMessageReceived);
-
+console.log("le destinataire ", selectedUsername);
     // Tell your username to the server
     stompClient.send("/app/chat.addUser",
         {},
         JSON.stringify({sender: username, type: 'JOIN', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
     )
 
+    const conversationIdGeneration = generateConversationId(username, selectedUsername);
+    console.log("voici mon mot de passe : ", conversationIdGeneration);
+
     connectingElement.classList.add('hidden');
+}
+
+function generateConversationId(sender, recipient) {
+    // S'assurer que l'ordre est alphabétique pour garantir l'unicité
+    return sender.localeCompare(recipient) < 0
+        ? `${sender}_${recipient}`
+        : `${recipient}_${sender}`;
 }
 
 function onDisconnected() {
