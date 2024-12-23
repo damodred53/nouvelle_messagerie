@@ -19,7 +19,7 @@ export const getAllUsers = async () => {
  */
 export async function getMessagesByConversationId(conversationId) {
     const apiUrl = `/api/chat/messages?conversationId=${encodeURIComponent(conversationId)}`;
-    
+    console.log("la fonction est appelée")
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',

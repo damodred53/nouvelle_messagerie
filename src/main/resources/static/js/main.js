@@ -1,6 +1,7 @@
 'use strict';
 
 import  createDropdownMenu  from './dropdownMenu.js';
+import { getMessagesByConversationId } from './services.js';
 import { getAllUsers } from './services.js';
 
 var usernamePage = document.querySelector('#username-page');
@@ -74,8 +75,9 @@ console.log("le destinataire ", selectedUsername);
         JSON.stringify({sender: username, type: 'JOIN', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
     )
 
-    const conversationIdGeneration = generateConversationId(username, selectedUsername);
-    console.log("voici mon mot de passe : ", conversationIdGeneration);
+    // const conversationIdGeneration = getMessagesByConversationId(selectedUsername);
+
+    
 
     connectingElement.classList.add('hidden');
 }
@@ -86,7 +88,7 @@ function generateConversationId(sender, recipient) {
         ? `${sender}_${recipient}`
         : `${recipient}_${sender}`;
 
-        
+
 }
 
 function onDisconnected() {
@@ -130,7 +132,7 @@ function sendMessage(event) {
             time: time   // Heure au format HH:mm
         };
 
-        console.log(chatMessage);
+
 
         // Envoi des messages via WebSocket
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
