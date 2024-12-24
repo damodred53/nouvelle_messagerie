@@ -31,7 +31,11 @@ public class ChatMessage {
     private String content;
     private String sender;
     private String recipient;
+
+    @Column(name = "date", columnDefinition = "DATE")
     private LocalDate date;
+
+    @Column(name = "time", columnDefinition = "TIME")
     private LocalTime time;
 
     @Column(nullable = false)

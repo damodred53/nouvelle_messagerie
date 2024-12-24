@@ -6,9 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -27,20 +25,23 @@ public class WebSocketEventListener {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String username = (String) headerAccessor.getSessionAttributes().get("username");
-        if (username != null) {
+        String conversationId = (String) headerAccessor.getSessionAttributes().get("conversationId"); // ID de la
+                                                                                                      // conversation
 
+        if (username != null && conversationId != null) {
             LocalTime formattedTime = LocalTime.now().withSecond(0).withNano(0);
             log.info("user disconnected: {}", username);
             var chatMessage = ChatMessage.builder()
                     .type(MessageType.LEAVE)
                     .date(LocalDate.now())
                     .time(formattedTime)
-                    .content(username + "a quitté la conversation")
+                    .content(username + " a quitté la conversation")
                     .sender(username)
                     .build();
-            log.info("user disconnected: {}", chatMessage);
-            messagingTemplate.convertAndSend("/topic/public", chatMessage);
+
+            // Envoyer le message de déconnexion dans le canal de la conversation spécifique
+            messagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage); // Utilisation de l'ID de la
+                                                                                       // conversation
         }
     }
-
 }

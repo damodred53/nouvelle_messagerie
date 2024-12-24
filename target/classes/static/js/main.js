@@ -65,7 +65,7 @@ function getCurrentDateTime() {
 }
 
 
-function onConnected() {
+const onConnected = async () => {
     // Subscribe to the Public Topic
     stompClient.subscribe('/topic/public', onMessageReceived);
 console.log("le destinataire ", selectedUsername);
@@ -74,39 +74,44 @@ console.log("le destinataire ", selectedUsername);
         {},
         JSON.stringify({sender: username, type: 'JOIN', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
     )
+    const generatedPassword = generateConversationId(username, selectedUsername);
 
-    // const conversationIdGeneration = getMessagesByConversationId(selectedUsername);
+    const conversationIdGeneration = await getMessagesByConversationId(generatedPassword);
 
+    console.log("la conversation id est ", conversationIdGeneration);
     
-
+    displayAllOldMessages(conversationIdGeneration);
     connectingElement.classList.add('hidden');
 }
+
+// const displayAllOldMessages = (messages) => {
+    
+// }
+
 
 function generateConversationId(sender, recipient) {
     // S'assurer que l'ordre est alphabétique pour garantir l'unicité
     return sender.localeCompare(recipient) < 0
         ? `${sender}_${recipient}`
         : `${recipient}_${sender}`;
-
-
 }
 
-function onDisconnected() {
-    // Informer le serveur que l'utilisateur quitte
-    stompClient.send("/chat.removeUser",
-        {},
-        JSON.stringify({sender: username, type: 'LEAVE', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
-    );
+// function onDisconnected() {
+//     // Informer le serveur que l'utilisateur quitte
+//     stompClient.send("/chat.removeUser",
+//         {},
+//         JSON.stringify({sender: username, type: 'LEAVE', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
+//     );
 
-    // Déconnexion de la WebSocket
-    stompClient.disconnect(function() {
-        console.log("Disconnected");
-        // Cacher la page de chat et afficher à nouveau la page de connexion
-        chatPage.classList.add('hidden');
-        usernamePage.classList.remove('hidden');
-        connectingElement.classList.add('hidden');
-    });
-}
+//     // Déconnexion de la WebSocket
+//     stompClient.disconnect(function() {
+//         console.log("Disconnected");
+//         // Cacher la page de chat et afficher à nouveau la page de connexion
+//         chatPage.classList.add('hidden');
+//         usernamePage.classList.remove('hidden');
+//         connectingElement.classList.add('hidden');
+//     });
+// }
 
 
 function onError(error) {
@@ -114,12 +119,28 @@ function onError(error) {
     connectingElement.style.color = 'red';
 }
 
+const displayAllOldMessages = (messages) => {
+
+    console.log("avant le tri", messages);
+    messages.sort((a, b) => {
+        const dateA = new Date(a.date + 'T' + a.time);
+        const dateB = new Date(b.date + 'T' + b.time);
+        return dateA.getTime() - dateB.getTime();
+    });
+    console.log("après le tri", messages);
+
+
+    messages.forEach(message => {
+        onMessageReceived({ body: JSON.stringify(message) }); // Utiliser la méthode locale
+    });
+};
+
 
 
 
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
-    if (messageContent && stompClient) {
+    if (messageContent && stompClient && selectedUsername) {
         // Appeler la fonction pour obtenir la date et l'heure formatées
         var { date, time } = getCurrentDateTime();
 
@@ -127,12 +148,10 @@ function sendMessage(event) {
             sender: username,
             content: messageInput.value,
             type: 'CHAT',
-            recipient: 'JohnDoe', // Remplace par le destinataire réel
+            recipient: selectedUsername, // Remplacer "JohnDoe" par le destinataire sélectionné
             date: date,  // Date au format YYYY-MM-DD
             time: time   // Heure au format HH:mm
         };
-
-
 
         // Envoi des messages via WebSocket
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
@@ -140,6 +159,8 @@ function sendMessage(event) {
 
         // Réinitialisation du champ message
         messageInput.value = '';
+    } else {
+        console.error("Le destinataire n'est pas sélectionné ou le message est vide.");
     }
     event.preventDefault();
 }

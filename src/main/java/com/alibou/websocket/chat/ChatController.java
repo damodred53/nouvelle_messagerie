@@ -109,16 +109,6 @@ public class ChatController {
         Utilisateur userToSave = new Utilisateur();
         userToSave.setUsername(username);
 
-        // Optional<Utilisateur> existingUser =
-        // utilisateurRepository.findByUsername(username);
-
-        // if (existingUser.isPresent()) {
-        // // Si l'utilisateur existe déjà, vous pouvez soit le refuser, soit l'ignorer
-        // System.out.println("Utilisateur déjà existant avec le username : " +
-        // username);
-        // return; // Ne pas enregistrer le même utilisateur
-        // }
-
         utilisateurRepository.save(userToSave);
         // Construire l'entité Message à partir de ChatMessage
 

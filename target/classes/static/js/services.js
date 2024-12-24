@@ -12,14 +12,16 @@ export const getAllUsers = async () => {
     
 }
 
+
+
 /**
  * Récupère les messages pour un conversationId spécifique via une requête GET.
  * @param {string} conversationId - L'identifiant unique de la conversation.
  * @returns {Promise<Array>} - Une promesse résolue avec une liste de messages.
  */
 export async function getMessagesByConversationId(conversationId) {
-    const apiUrl = `/api/chat/messages?conversationId=${encodeURIComponent(conversationId)}`;
-    console.log("la fonction est appelée")
+    const apiUrl = `/api/messages/by-conversation?conversationId=${encodeURIComponent(conversationId)}`;
+    console.log("la fonction est appelée");
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
