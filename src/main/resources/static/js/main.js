@@ -83,7 +83,7 @@ function generateConversationId(sender, recipient) {
         : `${recipient}_${sender}`;
 }
 
-function onError(error) {
+function onError() {
     connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
     connectingElement.style.color = 'red';
 }
@@ -131,7 +131,7 @@ function sendMessage(event) {
 
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
-    console.log("Message reçu :", message);
+
 
     var messageElement = document.createElement('li');
     messageElement.classList.add('chat-message');

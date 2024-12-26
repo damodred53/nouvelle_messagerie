@@ -2,9 +2,7 @@ package com.alibou.websocket.chat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -93,9 +91,11 @@ public class ChatController {
 
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
+    // @SendTo("/topic/" + conversationId)
     public ChatMessage addUser(
             @Payload ChatMessage chatMessage,
             SimpMessageHeaderAccessor headerAccessor) {
+        // String conversationId = generateConversationId(sender, recipient);
         // Ajouter l'utilisateur à la session et à la liste des utilisateurs actifs
         String username = chatMessage.getSender();
         LocalDate dateUserName = chatMessage.getDate();
