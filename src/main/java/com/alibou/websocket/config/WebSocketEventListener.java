@@ -30,7 +30,9 @@ public class WebSocketEventListener {
 
         if (username != null && conversationId != null) {
             LocalTime formattedTime = LocalTime.now().withSecond(0).withNano(0);
-            log.info("user disconnected: {}", username);
+            log.info("User disconnected: {}", username);
+
+            // Créer un message de déconnexion
             var chatMessage = ChatMessage.builder()
                     .type(MessageType.LEAVE)
                     .date(LocalDate.now())
@@ -39,9 +41,8 @@ public class WebSocketEventListener {
                     .sender(username)
                     .build();
 
-            // Envoyer le message de déconnexion dans le canal de la conversation spécifique
-            messagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage); // Utilisation de l'ID de la
-                                                                                       // conversation
+            // Envoyer le message de déconnexion au topic de la conversation spécifique
+            messagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage);
         }
     }
 }

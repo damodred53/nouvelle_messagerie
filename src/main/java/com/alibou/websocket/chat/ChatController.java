@@ -2,6 +2,7 @@ package com.alibou.websocket.chat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -53,18 +54,27 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.sendPrivateMessage")
-    public void sendPrivateMessage(
-            @Payload ChatMessage chatMessage,
-            SimpMessageHeaderAccessor headerAccessor) {
-        // Envoyer le message directement au destinataire via WebSocket
+    public void sendPrivateMessage(@Payload ChatMessage chatMessage) {
+        String sender = chatMessage.getSender();
         String recipient = chatMessage.getRecipient();
-        if (recipient != null) {
-            System.out.println("recipient: " + recipient);
+
+        if (recipient != null && sender != null) {
+            // Générer l'ID de la conversation (topic privé)
+            String conversationId = generateConversationId(sender, recipient);
+
+            // Logique de débogage pour vérifier l'ID généré
+            System.out.println("Sending message to conversationId: " + conversationId);
+
             saveMessage(chatMessage);
-            // Envoyer le message uniquement au destinataire
-            String destination = "/queue/private/" + recipient;
-            messagingTemplate.convertAndSendToUser(recipient, destination, chatMessage);
+            // Envoi du message au topic spécifique à la conversation
+            messagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage);
         }
+    }
+
+    private String generateConversationId(String sender, String recipient) {
+        // Générer l'ID de la conversation de manière alphabétique pour éviter les
+        // doublons
+        return sender.compareTo(recipient) < 0 ? sender + "_" + recipient : recipient + "_" + sender;
     }
 
     // Sauvegarde d'un message dans la base de données

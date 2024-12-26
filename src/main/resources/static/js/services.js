@@ -43,4 +43,9 @@ export async function getMessagesByConversationId(conversationId) {
     }
 }
 
-
+function generateConversationId(sender, recipient) {
+    // Tri des noms pour garantir l'unicité
+    return sender.localeCompare(recipient) < 0
+        ? `${sender}_${recipient}`
+        : `${recipient}_${sender}`;
+}
