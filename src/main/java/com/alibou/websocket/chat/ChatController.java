@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -89,13 +90,14 @@ public class ChatController {
         messageRepository.save(message);
     }
 
-    @MessageMapping("/chat.addUser")
-    @SendTo("/topic/public")
-    // @SendTo("/topic/" + conversationId)
-    public ChatMessage addUser(
+    @MessageMapping("/chat.addUser/{conversationId}")
+    public void addUser(
             @Payload ChatMessage chatMessage,
+            @DestinationVariable String conversationId,
             SimpMessageHeaderAccessor headerAccessor) {
-        // String conversationId = generateConversationId(sender, recipient);
+
+        System.out.println(chatMessage);
+
         // Ajouter l'utilisateur à la session et à la liste des utilisateurs actifs
         String username = chatMessage.getSender();
         LocalDate dateUserName = chatMessage.getDate();
@@ -104,14 +106,18 @@ public class ChatController {
         activeUsers.add(username);
 
         saveUser(username);
-        // Retourner un message de bienvenue
-        return ChatMessage.builder()
+
+        // Construire un message de bienvenue
+        ChatMessage welcomeMessage = ChatMessage.builder()
                 .type(MessageType.JOIN)
                 .sender(username)
                 .date(dateUserName)
                 .time(timeUserName)
                 .content("est dans la conversation !!")
                 .build();
+
+        // Envoyer ce message uniquement au topic spécifique à la conversation
+        messagingTemplate.convertAndSend("/topic/" + conversationId, welcomeMessage);
     }
 
     private void saveUser(String username) {
@@ -124,11 +130,12 @@ public class ChatController {
 
     }
 
-    @MessageMapping("/chat.removeUser")
-    @SendTo("/topic/public")
-    public ChatMessage removeUser(
+    @MessageMapping("/chat.removeUser/{conversationId}")
+    // @SendTo("/topic/public")
+    public void removeUser(
             @Payload ChatMessage chatMessage,
-            SimpMessageHeaderAccessor headerAccessor) {
+            SimpMessageHeaderAccessor headerAccessor,
+            @DestinationVariable String conversationId) {
         System.out.println(chatMessage);
         // Supprimer l'utilisateur de la liste des utilisateurs actifs
         String username = chatMessage.getSender();
@@ -137,12 +144,15 @@ public class ChatController {
         activeUsers.remove(username);
 
         // Retourner un message indiquant que l'utilisateur a quitté
-        return ChatMessage.builder()
-                .type(MessageType.LEAVE)
+        ChatMessage welcomeMessage = ChatMessage.builder()
+                .type(MessageType.JOIN)
                 .sender(username)
                 .date(dateUserName)
                 .time(timeUserName)
-                .content("has left the chat!")
+                .content("a quitté la conversation !!")
                 .build();
+
+        // Envoyer ce message uniquement au topic spécifique à la conversation
+        messagingTemplate.convertAndSend("/topic/" + conversationId, welcomeMessage);
     }
 }

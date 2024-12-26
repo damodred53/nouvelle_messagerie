@@ -63,13 +63,14 @@ const onConnected = async () => {
     stompClient.subscribe(`/topic/${conversationId}`, onMessageReceived);
 
     // Envoi d'un message indiquant que l'utilisateur a rejoint la conversation
-    stompClient.send("/app/chat.addUser", {}, JSON.stringify({
+    const response = await stompClient.send(`/app/chat.addUser/${conversationId}`, {}, JSON.stringify({
         sender: username,
         type: 'JOIN',
         date: getCurrentDateTime().date,
         time: getCurrentDateTime().time
     }));
 
+    console.log('Message de connexion envoyé:', response);
     // Récupérer les anciens messages pour afficher l'historique
     const conversationIdGeneration = await getMessagesByConversationId(conversationId);
     displayAllOldMessages(conversationIdGeneration);
@@ -131,7 +132,7 @@ function sendMessage(event) {
 
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
-
+    console.log('Message reçu:', message);
 
     var messageElement = document.createElement('li');
     messageElement.classList.add('chat-message');
@@ -178,5 +179,24 @@ function getAvatarColor(messageSender) {
     return colors[index];
 }
 
+const onDisconnect = async () => {
+    if (stompClient) {
+        const conversationId = generateConversationId(username, selectedUsername);
+        const response = await stompClient.send(`/app/chat.removeUser/${conversationId}`, {}, JSON.stringify({
+            sender: username,
+            type: 'JOIN',
+            date: getCurrentDateTime().date,
+            time: getCurrentDateTime().time
+        }));
+
+        
+            stompClient.disconnect();
+        
+        
+    }
+    window.location.reload();
+}
+
 usernameForm.addEventListener('submit', connect, true);
 messageForm.addEventListener('submit', sendMessage, true);
+disconnect_button.addEventListener('click', onDisconnect, true);
