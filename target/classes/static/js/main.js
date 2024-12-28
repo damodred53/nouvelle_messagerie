@@ -12,6 +12,7 @@ var messageInput = document.querySelector('#message');
 var messageArea = document.querySelector('#messageArea');
 var connectingElement = document.querySelector('.connecting');
 var disconnect_button = document.querySelector('.disconnect_button');
+var openingRoomButton = document.querySelector('.open-room');
 
 var stompClient = null;
 var username = null;
@@ -23,20 +24,33 @@ var colors = [
 ];
 
 window.addEventListener('DOMContentLoaded', async () => {
+    
     const allUsers = await getAllUsers();
     const menuContainer = document.getElementById('menu-container'); // Assurez-vous que cet élément existe dans votre HTML
     const dropdownMenu = await createDropdownMenu(allUsers, (secondPersonName) => {
         selectedUsername = secondPersonName;
-        console.log('Utilisateur sélectionné (callback dans main.js):', selectedUsername);
     });
+    //  updateOpeningRoomButton();
     menuContainer.appendChild(dropdownMenu.dropdown);
 });
 
-function connect(event) {
-    console.log(event);
-    username = document.querySelector('#name').value.trim();
+// export const updateOpeningRoomButton = () => {
+//     console.log('selectedUsername:', selectedUsername);
+//     console.log('username:', username);
+//     if (selectedUsername && username) {
+//         openingRoomButton.disabled = false;
+//     } else {
+//         openingRoomButton.disabled = false;
+//     }
+// }
 
-    if (username) {
+function connect(event) {
+    
+    username = document.querySelector('#name').value.trim();
+    console.log('username:', username);
+    console.log('selectedUsername:', selectedUsername);
+    //    updateOpeningRoomButton();
+    if (username && selectedUsername) {
         usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
 
@@ -44,6 +58,8 @@ function connect(event) {
         stompClient = Stomp.over(socket); 
 
         stompClient.connect({}, onConnected, onError);
+    } else {
+        alert('Veuillez saisir un nom d\'utilisateur et sélectionner un destinataire.');
     }
     event.preventDefault();
 }
@@ -137,6 +153,7 @@ function onMessageReceived(payload) {
     var messageElement = document.createElement('li');
     messageElement.classList.add('chat-message');
 
+
     var avatarElement = document.createElement('i');
     var avatarText = document.createTextNode(message.sender[0]);
     avatarElement.appendChild(avatarText);
@@ -189,10 +206,7 @@ const onDisconnect = async () => {
             time: getCurrentDateTime().time
         }));
 
-        
             stompClient.disconnect();
-        
-        
     }
     window.location.reload();
 }
