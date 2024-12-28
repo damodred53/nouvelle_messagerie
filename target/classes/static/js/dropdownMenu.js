@@ -1,6 +1,8 @@
 'use strict';
 
 
+
+
 const createDropdownMenu = async (allUsers, onUserSelected)  => {
 
     let selectedUsername = null;
@@ -31,7 +33,7 @@ const createDropdownMenu = async (allUsers, onUserSelected)  => {
         if (onUserSelected) {
             onUserSelected(selectedUsername);
         }
-
+       
         return selectedUsername;
     });
 

@@ -2,8 +2,7 @@
 export const getAllUsers = async () => {
     try {
         const allUsersResponse = await fetch('/api/users');
-        const data = await allUsersResponse.json();  // Attendre que la réponse JSON soit traitée
-        // console.log('Tous les utilisateurs:', data);
+        const data = await allUsersResponse.json();  
 
         return data;
     } catch (error) {
@@ -21,7 +20,7 @@ export const getAllUsers = async () => {
  */
 export async function getMessagesByConversationId(conversationId) {
     const apiUrl = `/api/messages/by-conversation?conversationId=${encodeURIComponent(conversationId)}`;
-    console.log("la fonction est appelée");
+
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -43,4 +42,9 @@ export async function getMessagesByConversationId(conversationId) {
     }
 }
 
-
+function generateConversationId(sender, recipient) {
+    // Tri des noms pour garantir l'unicité
+    return sender.localeCompare(recipient) < 0
+        ? `${sender}_${recipient}`
+        : `${recipient}_${sender}`;
+}

@@ -1,6 +1,6 @@
 'use strict';
 
-import  createDropdownMenu  from './dropdownMenu.js';
+import createDropdownMenu from './dropdownMenu.js';
 import { getMessagesByConversationId } from './services.js';
 import { getAllUsers } from './services.js';
 
@@ -12,6 +12,7 @@ var messageInput = document.querySelector('#message');
 var messageArea = document.querySelector('#messageArea');
 var connectingElement = document.querySelector('.connecting');
 var disconnect_button = document.querySelector('.disconnect_button');
+var openingRoomButton = document.querySelector('.open-room');
 
 var stompClient = null;
 var username = null;
@@ -23,25 +24,33 @@ var colors = [
 ];
 
 window.addEventListener('DOMContentLoaded', async () => {
+    
     const allUsers = await getAllUsers();
     const menuContainer = document.getElementById('menu-container'); // Assurez-vous que cet élément existe dans votre HTML
     const dropdownMenu = await createDropdownMenu(allUsers, (secondPersonName) => {
         selectedUsername = secondPersonName;
-        console.log('Utilisateur sélectionné (callback dans main.js):', selectedUsername);
     });
+    //  updateOpeningRoomButton();
     menuContainer.appendChild(dropdownMenu.dropdown);
-    
 });
 
-
-// // Ajouter l'écouteur d'événement pour la fermeture de la fenêtre
-// disconnect_button.addEventListener('click', onDisconnected, true);
+// export const updateOpeningRoomButton = () => {
+//     console.log('selectedUsername:', selectedUsername);
+//     console.log('username:', username);
+//     if (selectedUsername && username) {
+//         openingRoomButton.disabled = false;
+//     } else {
+//         openingRoomButton.disabled = false;
+//     }
+// }
 
 function connect(event) {
-    console.log(event);
+    
     username = document.querySelector('#name').value.trim();
-
-    if(username) {
+    console.log('username:', username);
+    console.log('selectedUsername:', selectedUsername);
+    //    updateOpeningRoomButton();
+    if (username && selectedUsername) {
         usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
 
@@ -49,154 +58,124 @@ function connect(event) {
         stompClient = Stomp.over(socket); 
 
         stompClient.connect({}, onConnected, onError);
+    } else {
+        alert('Veuillez saisir un nom d\'utilisateur et sélectionner un destinataire.');
     }
     event.preventDefault();
 }
 
 function getCurrentDateTime() {
     var now = new Date();
-
-    // Formater la date au format YYYY-MM-DD
     var date = now.toISOString().split('T')[0]; // Partie date de la ISO 8601 (YYYY-MM-DD)
-
-    // Formater l'heure au format HH:mm
     var time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0'); // HH:mm
     return { date: date, time: time };
 }
 
-
 const onConnected = async () => {
-    // Subscribe to the Public Topic
-    stompClient.subscribe('/topic/public', onMessageReceived);
-console.log("le destinataire ", selectedUsername);
-    // Tell your username to the server
-    stompClient.send("/app/chat.addUser",
-        {},
-        JSON.stringify({sender: username, type: 'JOIN', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
-    )
-    const generatedPassword = generateConversationId(username, selectedUsername);
+    // Exemple : l'utilisateur et le destinataire ont déjà été définis
+    const conversationId = generateConversationId(username, selectedUsername);
 
-    const conversationIdGeneration = await getMessagesByConversationId(generatedPassword);
+    // Abonner l'utilisateur au topic privé de la conversation
+    stompClient.subscribe(`/topic/${conversationId}`, onMessageReceived);
 
-    console.log("la conversation id est ", conversationIdGeneration);
-    
+    // Envoi d'un message indiquant que l'utilisateur a rejoint la conversation
+    const response = await stompClient.send(`/app/chat.addUser/${conversationId}`, {}, JSON.stringify({
+        sender: username,
+        type: 'JOIN',
+        date: getCurrentDateTime().date,
+        time: getCurrentDateTime().time
+    }));
+
+    console.log('Message de connexion envoyé:', response);
+    // Récupérer les anciens messages pour afficher l'historique
+    const conversationIdGeneration = await getMessagesByConversationId(conversationId);
     displayAllOldMessages(conversationIdGeneration);
+
     connectingElement.classList.add('hidden');
-}
-
-// const displayAllOldMessages = (messages) => {
-    
-// }
-
+};
 
 function generateConversationId(sender, recipient) {
-    // S'assurer que l'ordre est alphabétique pour garantir l'unicité
     return sender.localeCompare(recipient) < 0
         ? `${sender}_${recipient}`
         : `${recipient}_${sender}`;
 }
 
-// function onDisconnected() {
-//     // Informer le serveur que l'utilisateur quitte
-//     stompClient.send("/chat.removeUser",
-//         {},
-//         JSON.stringify({sender: username, type: 'LEAVE', date: getCurrentDateTime().date, time: getCurrentDateTime().time})
-//     );
-
-//     // Déconnexion de la WebSocket
-//     stompClient.disconnect(function() {
-//         console.log("Disconnected");
-//         // Cacher la page de chat et afficher à nouveau la page de connexion
-//         chatPage.classList.add('hidden');
-//         usernamePage.classList.remove('hidden');
-//         connectingElement.classList.add('hidden');
-//     });
-// }
-
-
-function onError(error) {
+function onError() {
     connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
     connectingElement.style.color = 'red';
 }
 
 const displayAllOldMessages = (messages) => {
-
-    console.log("avant le tri", messages);
+    console.log("Messages reçus pour l'historique :", messages);
     messages.sort((a, b) => {
         const dateA = new Date(a.date + 'T' + a.time);
         const dateB = new Date(b.date + 'T' + b.time);
         return dateA.getTime() - dateB.getTime();
     });
-    console.log("après le tri", messages);
-
 
     messages.forEach(message => {
-        onMessageReceived({ body: JSON.stringify(message) }); // Utiliser la méthode locale
+        onMessageReceived({ body: JSON.stringify(message) });
     });
 };
 
-
-
-
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
-    if (messageContent && stompClient && selectedUsername) {
-        // Appeler la fonction pour obtenir la date et l'heure formatées
+    if (messageContent && stompClient) {
+        // Obtenir la date et l'heure actuelles
         var { date, time } = getCurrentDateTime();
 
+        // Créer un message
         var chatMessage = {
             sender: username,
             content: messageInput.value,
             type: 'CHAT',
-            recipient: selectedUsername, // Remplacer "JohnDoe" par le destinataire sélectionné
-            date: date,  // Date au format YYYY-MM-DD
-            time: time   // Heure au format HH:mm
+            recipient: selectedUsername, // Le destinataire du message
+            date: date,
+            time: time
         };
 
-        // Envoi des messages via WebSocket
-        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+        // Générer l'ID de la conversation (topic privé)
+        const conversationId = generateConversationId(username, selectedUsername);
+
+        // Envoyer le message via WebSocket au topic privé
         stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(chatMessage));
 
-        // Réinitialisation du champ message
+        // Réinitialiser l'input
         messageInput.value = '';
-    } else {
-        console.error("Le destinataire n'est pas sélectionné ou le message est vide.");
     }
     event.preventDefault();
 }
 
-
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
-    console.log("voici le message : ", payload);
+    console.log('Message reçu:', message);
+
     var messageElement = document.createElement('li');
+    messageElement.classList.add('chat-message');
 
-    
-        messageElement.classList.add('chat-message');
 
-        var avatarElement = document.createElement('i');
-        var avatarText = document.createTextNode(message.sender[0]);
-        avatarElement.appendChild(avatarText);
-        avatarElement.style['background-color'] = getAvatarColor(message.sender);
+    var avatarElement = document.createElement('i');
+    var avatarText = document.createTextNode(message.sender[0]);
+    avatarElement.appendChild(avatarText);
+    avatarElement.style['background-color'] = getAvatarColor(message.sender);
 
-        messageElement.appendChild(avatarElement);
+    messageElement.appendChild(avatarElement);
 
-        var usernameElement = document.createElement('span');
-        var usernameText = document.createTextNode(message.sender);
-        var dateElement = document.createElement('span');
-        var dateText = document.createTextNode(message.date);
-        var timeElement = document.createElement('span');
-        var timeText = document.createTextNode(message.time);
-        
-        usernameElement.appendChild(usernameText);
-        messageElement.appendChild(usernameElement);
+    var usernameElement = document.createElement('span');
+    var usernameText = document.createTextNode(message.sender);
+    var dateElement = document.createElement('span');
+    var dateText = document.createTextNode(message.date);
+    var timeElement = document.createElement('span');
+    var timeText = document.createTextNode(message.time);
 
-        timeElement.appendChild(dateText);
-        messageElement.appendChild(dateElement);
+    usernameElement.appendChild(usernameText);
+    messageElement.appendChild(usernameElement);
 
-        timeElement.appendChild(timeText);
-        messageElement.appendChild(timeElement);
-    
+    dateElement.appendChild(dateText);
+    messageElement.appendChild(dateElement);
+
+    timeElement.appendChild(timeText);
+    messageElement.appendChild(timeElement);
 
     var textElement = document.createElement('p');
     var messageText = document.createTextNode(message.content);
@@ -205,9 +184,8 @@ function onMessageReceived(payload) {
     messageElement.appendChild(textElement);
 
     messageArea.appendChild(messageElement);
-    messageArea.scrollTop = messageArea.scrollHeight;
+    messageArea.scrollTop = messageArea.scrollHeight; // Faire défiler vers le bas
 }
-
 
 function getAvatarColor(messageSender) {
     var hash = 0;
@@ -218,5 +196,21 @@ function getAvatarColor(messageSender) {
     return colors[index];
 }
 
-usernameForm.addEventListener('submit', connect, true)
-messageForm.addEventListener('submit', sendMessage, true)
+const onDisconnect = async () => {
+    if (stompClient) {
+        const conversationId = generateConversationId(username, selectedUsername);
+        const response = await stompClient.send(`/app/chat.removeUser/${conversationId}`, {}, JSON.stringify({
+            sender: username,
+            type: 'JOIN',
+            date: getCurrentDateTime().date,
+            time: getCurrentDateTime().time
+        }));
+
+            stompClient.disconnect();
+    }
+    window.location.reload();
+}
+
+usernameForm.addEventListener('submit', connect, true);
+messageForm.addEventListener('submit', sendMessage, true);
+disconnect_button.addEventListener('click', onDisconnect, true);
