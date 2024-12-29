@@ -12,7 +12,8 @@ var messageInput = document.querySelector('#message');
 var messageArea = document.querySelector('#messageArea');
 var connectingElement = document.querySelector('.connecting');
 var disconnect_button = document.querySelector('.disconnect_button');
-var openingRoomButton = document.querySelector('.open-room');
+const chatHeader = document.querySelector('.chat_header');
+
 
 var stompClient = null;
 var username = null;
@@ -34,15 +35,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     menuContainer.appendChild(dropdownMenu.dropdown);
 });
 
-// export const updateOpeningRoomButton = () => {
-//     console.log('selectedUsername:', selectedUsername);
-//     console.log('username:', username);
-//     if (selectedUsername && username) {
-//         openingRoomButton.disabled = false;
-//     } else {
-//         openingRoomButton.disabled = false;
-//     }
-// }
 
 function connect(event) {
     
@@ -86,12 +78,17 @@ const onConnected = async () => {
         time: getCurrentDateTime().time
     }));
 
-    console.log('Message de connexion envoyé:', response);
+    
+    
     // Récupérer les anciens messages pour afficher l'historique
     const conversationIdGeneration = await getMessagesByConversationId(conversationId);
     displayAllOldMessages(conversationIdGeneration);
 
     connectingElement.classList.add('hidden');
+
+    if (chatHeader) {
+        chatHeader.innerHTML = `<h2>Conversation de ${username} et de ${selectedUsername}</h2>`
+    }
 };
 
 function generateConversationId(sender, recipient) {

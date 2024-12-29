@@ -13,7 +13,7 @@ const createDropdownMenu = async (allUsers, onUserSelected)  => {
     // Créer l'option par défaut
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
-    defaultOption.textContent = 'Sélectionner un utilisateur...';
+    defaultOption.textContent = 'Sélectionner un utilisateur';
     dropdown.appendChild(defaultOption);
     
     // Ajouter les options dynamiques basées sur les données
