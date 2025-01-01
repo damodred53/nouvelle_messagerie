@@ -12,7 +12,8 @@ var messageInput = document.querySelector('#message');
 var messageArea = document.querySelector('#messageArea');
 var connectingElement = document.querySelector('.connecting');
 var disconnect_button = document.querySelector('.disconnect_button');
-var openingRoomButton = document.querySelector('.open-room');
+const chatHeader = document.querySelector('.chat_header');
+
 
 var stompClient = null;
 var username = null;
@@ -34,15 +35,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     menuContainer.appendChild(dropdownMenu.dropdown);
 });
 
-// export const updateOpeningRoomButton = () => {
-//     console.log('selectedUsername:', selectedUsername);
-//     console.log('username:', username);
-//     if (selectedUsername && username) {
-//         openingRoomButton.disabled = false;
-//     } else {
-//         openingRoomButton.disabled = false;
-//     }
-// }
 
 function connect(event) {
     
@@ -74,7 +66,7 @@ function getCurrentDateTime() {
 const onConnected = async () => {
     // Exemple : l'utilisateur et le destinataire ont déjà été définis
     const conversationId = generateConversationId(username, selectedUsername);
-
+    console.log('conversationId:', conversationId);
     // Abonner l'utilisateur au topic privé de la conversation
     stompClient.subscribe(`/topic/${conversationId}`, onMessageReceived);
 
@@ -86,18 +78,23 @@ const onConnected = async () => {
         time: getCurrentDateTime().time
     }));
 
-    console.log('Message de connexion envoyé:', response);
+    
+    
     // Récupérer les anciens messages pour afficher l'historique
     const conversationIdGeneration = await getMessagesByConversationId(conversationId);
     displayAllOldMessages(conversationIdGeneration);
 
     connectingElement.classList.add('hidden');
+
+    if (chatHeader) {
+        chatHeader.innerHTML = `<h2>Conversation de ${username} et de ${selectedUsername}</h2>`
+    }
 };
 
 function generateConversationId(sender, recipient) {
     return sender.localeCompare(recipient) < 0
-        ? `${sender}_${recipient}`
-        : `${recipient}_${sender}`;
+        ? `${sender.toLowerCase()}_${recipient.toLowerCase()}`
+        : `${recipient.toLowerCase()}_${sender.toLowerCase()}`;
 }
 
 function onError() {
@@ -126,10 +123,10 @@ function sendMessage(event) {
 
         // Créer un message
         var chatMessage = {
-            sender: username,
+            sender: username.toLowerCase(),
             content: messageInput.value,
             type: 'CHAT',
-            recipient: selectedUsername, // Le destinataire du message
+            recipient: selectedUsername.toLowerCase(), // Le destinataire du message
             date: date,
             time: time
         };

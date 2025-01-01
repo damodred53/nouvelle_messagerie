@@ -1,0 +1,25 @@
+
+#dynamic-dropdown {
+    display: inline-block;
+    padding: 10px 8px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-top: 2rem;
+    /* Style */
+    border: none;
+    background: var(--button-background);
+    color: var(--button-color);
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    justify-content: center;
+    align-items: center;
+    color: white;
+    background-color: #6db33f;
+    
+}
+
+#dynamic-dropdown:active {
+    filter: brightness(75%);
+
+}

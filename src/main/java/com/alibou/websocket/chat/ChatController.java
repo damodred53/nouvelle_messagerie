@@ -54,8 +54,8 @@ public class ChatController {
 
     @MessageMapping("/chat.sendPrivateMessage")
     public void sendPrivateMessage(@Payload ChatMessage chatMessage) {
-        String sender = chatMessage.getSender();
-        String recipient = chatMessage.getRecipient();
+        String sender = chatMessage.getSender().toLowerCase();
+        String recipient = chatMessage.getRecipient().toLowerCase();
 
         if (recipient != null && sender != null) {
             // Générer l'ID de la conversation (topic privé)
@@ -73,15 +73,16 @@ public class ChatController {
     private String generateConversationId(String sender, String recipient) {
         // Générer l'ID de la conversation de manière alphabétique pour éviter les
         // doublons
-        return sender.compareTo(recipient) < 0 ? sender + "_" + recipient : recipient + "_" + sender;
+        String conversationId = (sender.compareTo(recipient) < 0) ? sender + "_" + recipient : recipient + "_" + sender;
+        return conversationId.toLowerCase();
     }
 
     // Sauvegarde d'un message dans la base de données
     private void saveMessage(ChatMessage chatMessage) {
         // Construire l'entité Message à partir de ChatMessage
         ChatMessage message = new ChatMessage(
-                chatMessage.getSender(),
-                chatMessage.getRecipient(),
+                chatMessage.getSender().toLowerCase(),
+                chatMessage.getRecipient().toLowerCase(),
                 chatMessage.getContent(),
                 LocalDate.now(), // Date du message
                 LocalTime.now() // Heure du message
@@ -100,12 +101,17 @@ public class ChatController {
 
         // Ajouter l'utilisateur à la session et à la liste des utilisateurs actifs
         String username = chatMessage.getSender();
+
         LocalDate dateUserName = chatMessage.getDate();
         LocalTime timeUserName = chatMessage.getTime();
         headerAccessor.getSessionAttributes().put("username", username);
-        activeUsers.add(username);
+        activeUsers.add(username.toLowerCase());
 
-        saveUser(username);
+        if (!isUserAlreadySaved(username.toLowerCase())) {
+            saveUser(username.toLowerCase());
+        } else {
+            System.out.println("L'utilisateur existe déjà dans la base de données");
+        }
 
         // Construire un message de bienvenue
         ChatMessage welcomeMessage = ChatMessage.builder()
@@ -154,5 +160,11 @@ public class ChatController {
 
         // Envoyer ce message uniquement au topic spécifique à la conversation
         messagingTemplate.convertAndSend("/topic/" + conversationId, welcomeMessage);
+    }
+
+    private boolean isUserAlreadySaved(String username) {
+        // Implémentez une méthode pour vérifier si l'utilisateur existe dans la base de
+        // données
+        return utilisateurRepository.existsByUsername(username); // Exemple avec un repository JPA
     }
 }

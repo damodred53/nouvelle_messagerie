@@ -135,7 +135,7 @@ button.accent {
     box-shadow: 0 1px 11px rgba(0, 0, 0, 0.27);
     margin-top: 30px;
     height: calc(100% - 60px);
-    max-height: 600px;
+    max-height: 700px;
     position: relative;
 }
 
@@ -150,7 +150,9 @@ button.accent {
 }
 
 #chat-page #messageForm {
-    padding: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    
 }
 
 #chat-page ul li {
@@ -238,6 +240,24 @@ button.accent {
     position: absolute;
     top: 65px;
     width: 100%;
+}
+
+.menu_container_button {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    button {
+        box-shadow: 0 1px 11px rgba(0, 0, 0, 0.27);
+    }
+}
+
+.chat_header {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ececec;
 }
 
 
