@@ -66,7 +66,7 @@ function getCurrentDateTime() {
 const onConnected = async () => {
     // Exemple : l'utilisateur et le destinataire ont déjà été définis
     const conversationId = generateConversationId(username, selectedUsername);
-
+    console.log('conversationId:', conversationId);
     // Abonner l'utilisateur au topic privé de la conversation
     stompClient.subscribe(`/topic/${conversationId}`, onMessageReceived);
 
@@ -93,8 +93,8 @@ const onConnected = async () => {
 
 function generateConversationId(sender, recipient) {
     return sender.localeCompare(recipient) < 0
-        ? `${sender}_${recipient}`
-        : `${recipient}_${sender}`;
+        ? `${sender.toLowerCase()}_${recipient.toLowerCase()}`
+        : `${recipient.toLowerCase()}_${sender.toLowerCase()}`;
 }
 
 function onError() {
@@ -123,10 +123,10 @@ function sendMessage(event) {
 
         // Créer un message
         var chatMessage = {
-            sender: username,
+            sender: username.toLowerCase(),
             content: messageInput.value,
             type: 'CHAT',
-            recipient: selectedUsername, // Le destinataire du message
+            recipient: selectedUsername.toLowerCase(), // Le destinataire du message
             date: date,
             time: time
         };

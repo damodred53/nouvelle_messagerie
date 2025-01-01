@@ -9,4 +9,5 @@ import com.alibou.websocket.chat.Models.Utilisateur;
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
     public Optional<Utilisateur> findByUsername(String username);
 
+    public boolean existsByUsername(String username);
 }
