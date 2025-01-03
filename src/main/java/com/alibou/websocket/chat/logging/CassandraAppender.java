@@ -23,7 +23,7 @@ public class CassandraAppender extends AbstractAppender {
     private final String insertQuery;
 
     // Constructor
-    protected CassandraAppender(String name, Layout<? extends Serializable> layout, CqlSession session,
+    public CassandraAppender(String name, Layout<? extends Serializable> layout, CqlSession session,
             String insertQuery) {
         super(name, null, layout);
         this.session = session;

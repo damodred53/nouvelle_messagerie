@@ -1,4 +1,3 @@
 com\alibou\websocket\chat\MessageType.class
-com\alibou\websocket\chat\config\RepositoryConfig.class
 com\alibou\websocket\config\WebSocketConfig.class
 com\alibou\websocket\ChatApplication.class
