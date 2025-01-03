@@ -1,3 +1,4 @@
+C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\logging\CassandraAppender.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Repository\MessageRepository.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Controlleur\MessageController.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Controlleur\UtilisateurControlleur.java
@@ -11,6 +12,8 @@ C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\ch
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Models\Utilisateur.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\config\WebSocketConfig.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\ChatApplication.java
+C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\config\Log4j2Config.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Repository\UtilisateurRepository.java
+C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\config\CassandraConfig.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\MessageType.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\ModelsCassandra\Log.java
