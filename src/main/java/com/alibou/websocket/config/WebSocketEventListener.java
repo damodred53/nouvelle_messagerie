@@ -1,13 +1,16 @@
 package com.alibou.websocket.config;
 
 import com.alibou.websocket.chat.Models.ChatMessage;
+
 import com.alibou.websocket.chat.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -43,7 +46,7 @@ public class WebSocketEventListener {
 
             // Envoyer le message de déconnexion au topic de la conversation spécifique
             messagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage);
-            log.info("Envoi du message de déconnexion : {}", chatMessage);
+
         }
     }
 }
