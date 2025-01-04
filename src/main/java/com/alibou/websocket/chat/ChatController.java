@@ -1,6 +1,7 @@
 package com.alibou.websocket.chat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +18,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.alibou.websocket.chat.Models.ChatMessage;
+import com.alibou.websocket.chat.Models.Log;
 import com.alibou.websocket.chat.Models.Utilisateur;
+import com.alibou.websocket.chat.Repository.LogRepository;
 import com.alibou.websocket.chat.Repository.MessageRepository;
 import com.alibou.websocket.chat.Repository.UtilisateurRepository;
 
@@ -30,6 +33,9 @@ public class ChatController {
 
     @Autowired
     private MessageRepository messageRepository;
+
+    @Autowired
+    private LogRepository logRepository;
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
@@ -49,6 +55,7 @@ public class ChatController {
     public List<String> getContacts(SimpMessageHeaderAccessor headerAccessor) {
         // Récupérer la liste des utilisateurs connectés (contacts)
         List<String> contacts = activeUsers.stream().collect(Collectors.toList());
+
         return contacts;
     }
 
@@ -64,7 +71,23 @@ public class ChatController {
             // Logique de débogage pour vérifier l'ID généré
             System.out.println("Sending message to conversationId: " + conversationId);
 
+            // Construire une représentation lisible du message
+            String logMessage = String.format("Content: %s",
+                    chatMessage.getContent());
+
+            Log log = Log.builder()
+                    .level("INFO")
+                    .sender(sender)
+                    .logger("ChatController")
+                    .message(logMessage)
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            logRepository.save(log); // Enregistrer le log dans la base
+
+            // Enregistrer le message dans une autre logique si nécessaire
             saveMessage(chatMessage);
+
             // Envoi du message au topic spécifique à la conversation
             messagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage);
         }
@@ -108,8 +131,31 @@ public class ChatController {
         activeUsers.add(username.toLowerCase());
 
         if (!isUserAlreadySaved(username.toLowerCase())) {
+
+            Log log = Log.builder()
+                    .level("INFO")
+                    .sender("ChatController")
+                    .logger("ChatController")
+                    .message("L'utilisateur " + username + " est enregistré en base de données")
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            logRepository.save(log); // Enregistrer le log dans la base
+
             saveUser(username.toLowerCase());
         } else {
+
+            Log log = Log.builder()
+                    .level("WARNING")
+                    .sender("ChatController")
+                    .logger("ChatController")
+                    .message(
+                            "L'utilisateur " + username + " est déjà présent en base de données, enregistrmeent annulé")
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            logRepository.save(log); // Enregistrer le log dans la base
+
             System.out.println("L'utilisateur existe déjà dans la base de données");
         }
 
@@ -148,6 +194,16 @@ public class ChatController {
         LocalDate dateUserName = chatMessage.getDate();
         LocalTime timeUserName = chatMessage.getTime();
         activeUsers.remove(username);
+
+        Log log = Log.builder()
+                .level("INFO")
+                .sender("ChatController")
+                .logger("ChatController")
+                .message("L'utilisateur " + username + " a quitté la conversation " + conversationId)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        logRepository.save(log); // Enregistrer le log dans la base
 
         // Retourner un message indiquant que l'utilisateur a quitté
         ChatMessage welcomeMessage = ChatMessage.builder()
