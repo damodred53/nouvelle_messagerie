@@ -23,6 +23,7 @@ import com.alibou.websocket.chat.Models.Utilisateur;
 import com.alibou.websocket.chat.Repository.LogRepository;
 import com.alibou.websocket.chat.Repository.MessageRepository;
 import com.alibou.websocket.chat.Repository.UtilisateurRepository;
+import com.alibou.websocket.chat.service.LogService;
 
 @Controller
 public class ChatController {
@@ -33,6 +34,9 @@ public class ChatController {
 
     @Autowired
     private MessageRepository messageRepository;
+
+    @Autowired
+    private LogService logService;
 
     @Autowired
     private LogRepository logRepository;
@@ -75,15 +79,7 @@ public class ChatController {
             String logMessage = String.format("Content: %s",
                     chatMessage.getContent());
 
-            Log log = Log.builder()
-                    .level("INFO")
-                    .sender(sender)
-                    .logger("ChatController")
-                    .message(logMessage)
-                    .timestamp(LocalDateTime.now())
-                    .build();
-
-            logRepository.save(log); // Enregistrer le log dans la base
+            logService.insertLog(logMessage, "INFO", "ChatController", sender);
 
             // Enregistrer le message dans une autre logique si nécessaire
             saveMessage(chatMessage);
@@ -132,29 +128,15 @@ public class ChatController {
 
         if (!isUserAlreadySaved(username.toLowerCase())) {
 
-            Log log = Log.builder()
-                    .level("INFO")
-                    .sender("ChatController")
-                    .logger("ChatController")
-                    .message("L'utilisateur " + username + " est enregistré en base de données")
-                    .timestamp(LocalDateTime.now())
-                    .build();
-
-            logRepository.save(log); // Enregistrer le log dans la base
+            logService.insertLog("L'utilisateur " + username + " est enregistré en base de données", "INFO",
+                    "ChatController", "Controller");
 
             saveUser(username.toLowerCase());
         } else {
 
-            Log log = Log.builder()
-                    .level("WARNING")
-                    .sender("ChatController")
-                    .logger("ChatController")
-                    .message(
-                            "L'utilisateur " + username + " est déjà présent en base de données, enregistrmeent annulé")
-                    .timestamp(LocalDateTime.now())
-                    .build();
-
-            logRepository.save(log); // Enregistrer le log dans la base
+            logService.insertLog(
+                    "L'utilisateur " + username + " est déjà présent en base de données, enregistrmeent annulé",
+                    "WARNING", "ChatController", "Controller");
 
             System.out.println("L'utilisateur existe déjà dans la base de données");
         }
@@ -195,15 +177,8 @@ public class ChatController {
         LocalTime timeUserName = chatMessage.getTime();
         activeUsers.remove(username);
 
-        Log log = Log.builder()
-                .level("INFO")
-                .sender("ChatController")
-                .logger("ChatController")
-                .message("L'utilisateur " + username + " a quitté la conversation " + conversationId)
-                .timestamp(LocalDateTime.now())
-                .build();
-
-        logRepository.save(log); // Enregistrer le log dans la base
+        logService.insertLog("L'utilisateur " + username + " a quitté la conversation " + conversationId, "INFO",
+                "ChatController", "Controller");
 
         // Retourner un message indiquant que l'utilisateur a quitté
         ChatMessage welcomeMessage = ChatMessage.builder()

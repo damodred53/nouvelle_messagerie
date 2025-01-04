@@ -1,22 +1,21 @@
 package com.alibou.websocket.chat.test;
 
-import com.datastax.oss.driver.api.core.CqlSession;
+import com.alibou.websocket.chat.service.LogService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CassandraTest implements CommandLineRunner {
 
-    private final CqlSession cqlSession;
+    private final LogService logService;
 
-    public CassandraTest(CqlSession cqlSession) {
-        this.cqlSession = cqlSession;
+    public CassandraTest(LogService logService) {
+        this.logService = logService;
     }
 
     @Override
     public void run(String... args) {
-        cqlSession.execute(
-                "INSERT INTO my_logs.logs (id, message, level, logger, timestamp) VALUES (uuid(), 'Coucou', 'INFO', 'CassandraTest', toTimestamp(now()))");
-        System.out.println("Log inséré dans Cassandra !");
+        // Utiliser le service pour insérer un log dans Cassandra via CqlSession
+        logService.insertLog("Coucou ça marche !!", "INFO", "CassandraTest", "Florent");
     }
 }
