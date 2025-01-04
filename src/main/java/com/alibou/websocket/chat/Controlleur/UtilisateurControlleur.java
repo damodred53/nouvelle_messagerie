@@ -14,6 +14,7 @@ import com.alibou.websocket.chat.Models.Utilisateur;
 import com.alibou.websocket.chat.Repository.LogRepository;
 import com.alibou.websocket.chat.Repository.UtilisateurRepository;
 import com.alibou.websocket.chat.Response.UtilisateurResponse;
+import com.alibou.websocket.chat.service.LogService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,20 +31,14 @@ public class UtilisateurControlleur {
     @Autowired
     private LogRepository logRepository;
 
+    @Autowired
+    private LogService logService;
+
     @GetMapping
     public List<UtilisateurResponse> findAll() {
         log.debug("Finding all users ...");
 
-        // Créer un log avec le message et l'heure actuelle
-        Log log = Log.builder()
-                .level("INFO") // Niveau de log
-                .logger("ChatController") // Indiquer la source du log
-                .message("L'ensemble des utilisateurs ont été récupérés") // Message spécifique
-                .timestamp(LocalDateTime.now()) // Utiliser l'heure actuelle
-                .build();
-
-        // Enregistrer le log dans la base de données PostgreSQL
-        logRepository.save(log);
+        logService.insertLog("L'ensemble des utilisateurs ont été récupérés", "INFO", "ChatController", "Controller");
 
         return this.utilisateurRepository.findAll()
                 .stream()
