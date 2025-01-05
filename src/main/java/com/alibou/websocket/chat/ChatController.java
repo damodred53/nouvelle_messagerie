@@ -1,7 +1,6 @@
 package com.alibou.websocket.chat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
@@ -17,13 +16,11 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import com.alibou.websocket.chat.LogService.LogService;
 import com.alibou.websocket.chat.Models.ChatMessage;
-import com.alibou.websocket.chat.Models.Log;
 import com.alibou.websocket.chat.Models.Utilisateur;
-import com.alibou.websocket.chat.Repository.LogRepository;
 import com.alibou.websocket.chat.Repository.MessageRepository;
 import com.alibou.websocket.chat.Repository.UtilisateurRepository;
-import com.alibou.websocket.chat.service.LogService;
 
 @Controller
 public class ChatController {
@@ -37,9 +34,6 @@ public class ChatController {
 
     @Autowired
     private LogService logService;
-
-    @Autowired
-    private LogRepository logRepository;
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
@@ -143,7 +137,7 @@ public class ChatController {
 
         // Construire un message de bienvenue
         ChatMessage welcomeMessage = ChatMessage.builder()
-                .type(MessageType.JOIN)
+
                 .sender(username)
                 .date(dateUserName)
                 .time(timeUserName)
@@ -182,7 +176,7 @@ public class ChatController {
 
         // Retourner un message indiquant que l'utilisateur a quitté
         ChatMessage welcomeMessage = ChatMessage.builder()
-                .type(MessageType.JOIN)
+
                 .sender(username)
                 .date(dateUserName)
                 .time(timeUserName)

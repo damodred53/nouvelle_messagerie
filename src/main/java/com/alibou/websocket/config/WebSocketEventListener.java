@@ -2,15 +2,12 @@ package com.alibou.websocket.config;
 
 import com.alibou.websocket.chat.Models.ChatMessage;
 
-import com.alibou.websocket.chat.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -37,7 +34,7 @@ public class WebSocketEventListener {
 
             // Créer un message de déconnexion
             var chatMessage = ChatMessage.builder()
-                    .type(MessageType.LEAVE)
+
                     .date(LocalDate.now())
                     .time(formattedTime)
                     .content(username + " a quitté la conversation")
