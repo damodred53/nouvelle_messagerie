@@ -24,10 +24,10 @@ public class Log {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String level; // Niveau de log (INFO, WARN, ERROR, etc.)
+    private String level;
     private String sender;
-    private String logger; // Nom du logger
-    private String message; // Contenu du message
-    private LocalDateTime timestamp; // Date et heure de l'événement
+    private String logger;
+    private String message;
+    private LocalDateTime timestamp;
 
 }

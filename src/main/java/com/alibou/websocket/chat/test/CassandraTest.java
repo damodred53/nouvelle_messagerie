@@ -1,8 +1,9 @@
 package com.alibou.websocket.chat.test;
 
-import com.alibou.websocket.chat.service.LogService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import com.alibou.websocket.chat.LogService.LogService;
 
 @Component
 public class CassandraTest implements CommandLineRunner {

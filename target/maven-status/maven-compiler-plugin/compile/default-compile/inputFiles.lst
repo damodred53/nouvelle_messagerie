@@ -1,11 +1,10 @@
-C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\logging\CassandraAppender.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Repository\MessageRepository.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Controlleur\MessageController.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Controlleur\UtilisateurControlleur.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Repository\LogRepository.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Models\ChatMessage.java
-C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\service\LogService.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Models\Log.java
+C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\LogService\LogService.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\ChatController.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\config\WebSocketEventListener.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\MessageService\MessageService.java
@@ -14,6 +13,6 @@ C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\ch
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\config\WebSocketConfig.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\ChatApplication.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Repository\UtilisateurRepository.java
-C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\config\CassandraConfig.java
+C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\Config\CassandraConfig.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\test\CassandraTest.java
 C:\Users\flore\Desktop\nouvelle messagerie\src\main\java\com\alibou\websocket\chat\MessageType.java

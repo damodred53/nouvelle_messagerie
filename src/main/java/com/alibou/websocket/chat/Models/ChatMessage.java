@@ -3,8 +3,6 @@ package com.alibou.websocket.chat.Models;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.alibou.websocket.chat.MessageType;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -55,12 +53,12 @@ public class ChatMessage {
         return (sender.compareToIgnoreCase(recipient) < 0) ? sender + "_" + recipient : recipient + "_" + sender;
     }
 
-    public static class ChatMessageBuilder {
-        private MessageType type;
+    // public static class ChatMessageBuilder {
+    // private MessageType type;
 
-        public ChatMessageBuilder type(MessageType type) {
-            this.type = type;
-            return this;
-        }
-    }
+    // public ChatMessageBuilder type(MessageType type) {
+    // this.type = type;
+    // return this;
+    // }
+    // }
 }

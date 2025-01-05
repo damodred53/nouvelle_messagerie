@@ -6,7 +6,6 @@ import com.alibou.websocket.chat.Repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -28,7 +27,7 @@ public class MessageController {
             return ResponseEntity.noContent().build();
         }
 
-        // Retourner les messages trouvés
         return ResponseEntity.ok(messages);
     }
+
 }

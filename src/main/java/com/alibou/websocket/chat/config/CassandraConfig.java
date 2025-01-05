@@ -1,4 +1,4 @@
-package com.alibou.websocket.chat.config;
+package com.alibou.websocket.chat.Config;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +9,6 @@ public class CassandraConfig {
 
     @Bean
     public CqlSession cqlSession() {
-        return CqlSession.builder().build(); // Assurez-vous que Cassandra est en cours d'exécution
+        return CqlSession.builder().build();
     }
 }
