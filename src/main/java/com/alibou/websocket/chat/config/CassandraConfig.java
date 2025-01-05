@@ -1,4 +1,4 @@
-package com.alibou.websocket.chat.Config;
+package com.alibou.websocket.chat.config;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.springframework.context.annotation.Bean;
