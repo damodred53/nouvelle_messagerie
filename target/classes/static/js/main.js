@@ -25,7 +25,7 @@ var colors = [
 ];
 
 window.addEventListener('DOMContentLoaded', async () => {
-    
+
     const allUsers = await getAllUsers();
     const menuContainer = document.getElementById('menu-container'); // Assurez-vous que cet élément existe dans votre HTML
     const dropdownMenu = await createDropdownMenu(allUsers, (secondPersonName) => {
@@ -48,7 +48,7 @@ window.addEventListener("online",  () => {
 
 
 function connect(event) {
-    
+
     username = document.querySelector('#name').value.trim();
     console.log('username:', username);
     console.log('selectedUsername:', selectedUsername);
@@ -58,7 +58,7 @@ function connect(event) {
         chatPage.classList.remove('hidden');
 
         var socket = new SockJS('/ws');
-        stompClient = Stomp.over(socket); 
+        stompClient = Stomp.over(socket);
 
         stompClient.connect({}, onConnected, onError);
     } else {
@@ -89,8 +89,8 @@ const onConnected = async () => {
         time: getCurrentDateTime().time
     }));
 
-    
-    
+
+
     // Récupérer les anciens messages pour afficher l'historique
     const conversationIdGeneration = await getMessagesByConversationId(conversationId);
     displayAllOldMessages(conversationIdGeneration);
@@ -143,8 +143,8 @@ function sendMessage(eventOrMessage) {
 
     if (messageContent && stompClient) {
         // Obtenir la date et l'heure actuelles si ce n'est pas un message caché
-        const { date, time } = isCachedMessage ? 
-            { date: eventOrMessage.date, time: eventOrMessage.time } : 
+        const { date, time } = isCachedMessage ?
+            { date: eventOrMessage.date, time: eventOrMessage.time } :
             getCurrentDateTime();
 
         const chatMessage = isCachedMessage
@@ -181,7 +181,7 @@ function onMessageReceived(payload) {
     var messageElement = document.createElement('li');
     messageElement.classList.add('chat-message');
 
-
+    // Création de l'avatar
     var avatarElement = document.createElement('i');
     var avatarText = document.createTextNode(message.sender[0]);
     avatarElement.appendChild(avatarText);
@@ -192,19 +192,29 @@ function onMessageReceived(payload) {
     var usernameElement = document.createElement('span');
     var usernameText = document.createTextNode(message.sender);
     var dateElement = document.createElement('span');
-    var dateText = document.createTextNode(message.date);
     var timeElement = document.createElement('span');
-    var timeText = document.createTextNode(message.time);
 
+    // Formater la date et l'heure
+    const formattedDateTime = formatMessageDate(message.date, message.time);
+
+    // Date et heure en gris et plus petit
+    dateElement.textContent = formattedDateTime;
+    dateElement.style.fontSize = '0.8rem'; // Plus petit
+    dateElement.style.color = 'gray'; // Couleur grise pour la date
+
+    // Ajouter le nom de l'utilisateur et séparer de deux espaces
     usernameElement.appendChild(usernameText);
     messageElement.appendChild(usernameElement);
 
-    dateElement.appendChild(dateText);
+    // Créer un espace pour séparer avec deux espaces
+    var spaceElement = document.createElement('span');
+    spaceElement.textContent = '  '; // Deux espaces
+    messageElement.appendChild(spaceElement);
+
+    // Ajouter la date et l'heure
     messageElement.appendChild(dateElement);
 
-    timeElement.appendChild(timeText);
-    messageElement.appendChild(timeElement);
-
+    // Ajouter le texte du message
     var textElement = document.createElement('p');
     var messageText = document.createTextNode(message.content);
     textElement.appendChild(messageText);
@@ -214,6 +224,8 @@ function onMessageReceived(payload) {
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight; // Faire défiler vers le bas
 }
+
+
 
 function getAvatarColor(messageSender) {
     var hash = 0;
@@ -238,9 +250,28 @@ const onDisconnect = async () => {
     }
     window.location.reload();
 }
+function getRelativeDate(messageDate) {
+    const now = new Date();
+    const messageDateObj = new Date(messageDate);
 
+    // Comparer la date sans tenir compte de l'heure
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    // Formater la date du message
+    if (messageDateObj >= today) {
+        return "Aujourd'hui";
+    } else if (messageDateObj >= yesterday) {
+        return "Hier";
+    } else {
+        return messageDateObj.toLocaleDateString('fr-FR'); // Affiche la date au format standard
+    }
+}
+function formatMessageDate(date, time) {
+    const relativeDate = getRelativeDate(date); // Utiliser la fonction que nous avons définie pour obtenir "Aujourd'hui" ou "Hier"
+    return `${relativeDate} ${time}`; // Retourne "Aujourd'hui 20:37"
+}
 usernameForm.addEventListener('submit', connect, true);
 messageForm.addEventListener('submit', sendMessage, true);
 disconnect_button.addEventListener('click', onDisconnect, true);
-
-
