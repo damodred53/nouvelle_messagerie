@@ -54,3 +54,6 @@ export function saveMessageToLocalStorage(message) {
     cachedMessages.push(message);
     localStorage.setItem("offlineMessages", JSON.stringify(cachedMessages));
 }
+
+
+

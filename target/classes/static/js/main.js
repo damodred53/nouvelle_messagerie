@@ -40,7 +40,8 @@ window.addEventListener("online",  () => {
     console.log('cachedMessages:', cachedMessages);
     if (cachedMessages.length > 0) {
         cachedMessages.forEach(message => {
-            sendMessage(message); // Nouvelle fonction pour envoyer un message du cache
+            // sendMessage(message); 
+            stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(message));
         });
         localStorage.removeItem("offlineMessages");
     }
@@ -147,7 +148,7 @@ function sendMessage(eventOrMessage) {
             getCurrentDateTime();
 
         const chatMessage = isCachedMessage
-            ? eventOrMessage // Reprendre directement le message du cache
+            ? eventOrMessage 
             : {
                 sender: username.toLowerCase(),
                 content: messageInput.value,
@@ -162,6 +163,7 @@ function sendMessage(eventOrMessage) {
 
         if (!navigator.onLine && !isCachedMessage) {
             saveMessageToLocalStorage(chatMessage);
+            onMessageReceived({ body: JSON.stringify(chatMessage) });
         } else {
             stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(chatMessage));
         }
@@ -221,7 +223,7 @@ function onMessageReceived(payload) {
     messageElement.appendChild(textElement);
 
     messageArea.appendChild(messageElement);
-    messageArea.scrollTop = messageArea.scrollHeight; // Faire défiler vers le bas
+    messageArea.scrollTop = messageArea.scrollHeight;
 }
 
 
