@@ -233,15 +233,6 @@ button.accent {
     font-weight: 500;
 }
 
-.connecting {
-    padding-top: 5px;
-    text-align: center;
-    color: #777;
-    position: absolute;
-    top: 65px;
-    width: 100%;
-}
-
 .menu_container_button {
     display: flex;
     justify-content: center;
@@ -293,7 +284,11 @@ button.accent {
     #messageForm .input-group input {
         width: calc(100% - 70px);
     }
-
+    .message-date {
+    font-size: 0.8em;
+    color: gray;
+    margin-left: 5px;
+    }
     .chat-header {
         padding: 10px;
     }
