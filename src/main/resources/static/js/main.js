@@ -2,7 +2,7 @@
 
 import createDropdownMenu from './dropdownMenu.js';
 import { getMessagesByConversationId } from './services.js';
-import { getAllUsers } from './services.js';
+import { getAllUsers, saveMessageToLocalStorage } from './services.js';
 
 var usernamePage = document.querySelector('#username-page');
 var chatPage = document.querySelector('#chat-page');
@@ -33,6 +33,17 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
     //  updateOpeningRoomButton();
     menuContainer.appendChild(dropdownMenu.dropdown);
+});
+
+window.addEventListener("online",  () => {
+    const cachedMessages = JSON.parse(localStorage.getItem("offlineMessages")) || [];
+    console.log('cachedMessages:', cachedMessages);
+    if (cachedMessages.length > 0) {
+        cachedMessages.forEach(message => {
+            sendMessage(message); // Nouvelle fonction pour envoyer un message du cache
+        });
+        localStorage.removeItem("offlineMessages");
+    }
 });
 
 
@@ -115,32 +126,52 @@ const displayAllOldMessages = (messages) => {
     });
 };
 
-function sendMessage(event) {
-    var messageContent = messageInput.value.trim();
-    if (messageContent && stompClient) {
-        // Obtenir la date et l'heure actuelles
-        var { date, time } = getCurrentDateTime();
+function sendMessage(eventOrMessage) {
+    // Vérifier si eventOrMessage est un événement ou un message
+    let messageContent;
+    let isCachedMessage = false;
 
-        // Créer un message
-        var chatMessage = {
-            sender: username.toLowerCase(),
-            content: messageInput.value,
-            type: 'CHAT',
-            recipient: selectedUsername.toLowerCase(), // Le destinataire du message
-            date: date,
-            time: time
-        };
+    if (eventOrMessage.preventDefault) {
+        // Cas où la fonction est appelée comme gestionnaire d'événement
+        eventOrMessage.preventDefault();
+        messageContent = messageInput.value.trim();
+    } else {
+        // Cas où la fonction est appelée avec un message depuis le cache
+        isCachedMessage = true;
+        messageContent = eventOrMessage.content; // Contenu du message dans le cache
+    }
+
+    if (messageContent && stompClient) {
+        // Obtenir la date et l'heure actuelles si ce n'est pas un message caché
+        const { date, time } = isCachedMessage ? 
+            { date: eventOrMessage.date, time: eventOrMessage.time } : 
+            getCurrentDateTime();
+
+        const chatMessage = isCachedMessage
+            ? eventOrMessage // Reprendre directement le message du cache
+            : {
+                sender: username.toLowerCase(),
+                content: messageInput.value,
+                type: 'CHAT',
+                recipient: selectedUsername.toLowerCase(),
+                date: date,
+                time: time
+            };
 
         // Générer l'ID de la conversation (topic privé)
         const conversationId = generateConversationId(username, selectedUsername);
 
-        // Envoyer le message via WebSocket au topic privé
-        stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(chatMessage));
+        if (!navigator.onLine && !isCachedMessage) {
+            saveMessageToLocalStorage(chatMessage);
+        } else {
+            stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(chatMessage));
+        }
 
-        // Réinitialiser l'input
-        messageInput.value = '';
+        // Réinitialiser l'input uniquement pour un événement
+        if (!isCachedMessage) {
+            messageInput.value = '';
+        }
     }
-    event.preventDefault();
 }
 
 function onMessageReceived(payload) {
@@ -211,3 +242,5 @@ const onDisconnect = async () => {
 usernameForm.addEventListener('submit', connect, true);
 messageForm.addEventListener('submit', sendMessage, true);
 disconnect_button.addEventListener('click', onDisconnect, true);
+
+

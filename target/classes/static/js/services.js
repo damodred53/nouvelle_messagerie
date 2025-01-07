@@ -47,3 +47,10 @@ function generateConversationId(sender, recipient) {
         ? `${sender.toLowerCase()}_${recipient.toLowerCase()}`
         : `${recipient.toLowerCase()}_${sender.toLowerCase()}`;
 }
+
+export function saveMessageToLocalStorage(message) {
+    console.log('Enregistrement du message dans le cache local:', message);
+    const cachedMessages = JSON.parse(localStorage.getItem("offlineMessages")) || [];
+    cachedMessages.push(message);
+    localStorage.setItem("offlineMessages", JSON.stringify(cachedMessages));
+}
