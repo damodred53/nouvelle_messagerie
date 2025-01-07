@@ -95,7 +95,6 @@ const onConnected = async () => {
     const conversationIdGeneration = await getMessagesByConversationId(conversationId);
     displayAllOldMessages(conversationIdGeneration);
 
-    connectingElement.classList.add('hidden');
 
     if (chatHeader) {
         chatHeader.innerHTML = `<h2>Conversation de ${username} et de ${selectedUsername}</h2>`
