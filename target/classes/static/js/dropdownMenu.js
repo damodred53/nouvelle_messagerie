@@ -2,15 +2,20 @@
 
 
 
-
+/**
+ * Gestionnaire du menu déroulant pour la sélection d'un utilisateur à l'écran d'accueil
+ * @param {*} allUsers 
+ * @param {*} onUserSelected 
+ * @returns 
+ */
 const createDropdownMenu = async (allUsers, onUserSelected)  => {
 
     let selectedUsername = null;
-    // Créer l'élément select pour le menu déroulant
+
     const dropdown = document.createElement('select');
     dropdown.id = 'dynamic-dropdown';
     
-    // Créer l'option par défaut
+
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
     defaultOption.textContent = 'Sélectionner un utilisateur';
@@ -37,7 +42,6 @@ const createDropdownMenu = async (allUsers, onUserSelected)  => {
         return selectedUsername;
     });
 
-    // Retourner l'élément dropdown créé
     return { dropdown, getSelectedUsername: () => selectedUsername };
 }
 

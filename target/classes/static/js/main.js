@@ -14,7 +14,6 @@ var connectingElement = document.querySelector('.connecting');
 var disconnect_button = document.querySelector('.disconnect_button');
 const chatHeader = document.querySelector('.chat_header');
 
-
 var stompClient = null;
 var username = null;
 let selectedUsername = null;
@@ -24,36 +23,43 @@ var colors = [
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
 ];
 
+/**
+ * Lorsque la page est chargée, nous devons afficher le menu déroulant des utilisateurs
+ */
 window.addEventListener('DOMContentLoaded', async () => {
 
     const allUsers = await getAllUsers();
-    const menuContainer = document.getElementById('menu-container'); // Assurez-vous que cet élément existe dans votre HTML
+    const menuContainer = document.getElementById('menu-container'); 
     const dropdownMenu = await createDropdownMenu(allUsers, (secondPersonName) => {
         selectedUsername = secondPersonName;
     });
-    //  updateOpeningRoomButton();
     menuContainer.appendChild(dropdownMenu.dropdown);
 });
 
+/**
+ * Lorsque l'utilisateur revient en ligne, nous devons envoyer les messages en attente
+ */
 window.addEventListener("online",  () => {
     const cachedMessages = JSON.parse(localStorage.getItem("offlineMessages")) || [];
     console.log('cachedMessages:', cachedMessages);
     if (cachedMessages.length > 0) {
         cachedMessages.forEach(message => {
-            // sendMessage(message); 
+            /* envoi des messages à la websocket */
             stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(message));
         });
         localStorage.removeItem("offlineMessages");
     }
 });
 
-
+/**
+ * Fonction gérant la connexion d'un utilisateur à une conversation.
+ * @param {*} event 
+ */
 function connect(event) {
 
     username = document.querySelector('#name').value.trim();
     console.log('username:', username);
     console.log('selectedUsername:', selectedUsername);
-    //    updateOpeningRoomButton();
     if (username && selectedUsername) {
         usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
@@ -70,7 +76,7 @@ function connect(event) {
 
 function getCurrentDateTime() {
     var now = new Date();
-    var date = now.toISOString().split('T')[0]; // Partie date de la ISO 8601 (YYYY-MM-DD)
+    var date = now.toISOString().split('T')[0]; 
     var time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0'); // HH:mm
     return { date: date, time: time };
 }
@@ -90,18 +96,22 @@ const onConnected = async () => {
         time: getCurrentDateTime().time
     }));
 
-
-
     // Récupérer les anciens messages pour afficher l'historique
     const conversationIdGeneration = await getMessagesByConversationId(conversationId);
     displayAllOldMessages(conversationIdGeneration);
 
-
+    /* Mettre à jour le titre au-dessus de la conversation */
     if (chatHeader) {
         chatHeader.innerHTML = `<h2>Conversation de ${username} et de ${selectedUsername}</h2>`
     }
 };
 
+/**
+ * Création de l'ID de la conversation en fonction des noms d'utilisateur
+ * @param {*} sender 
+ * @param {*} recipient 
+ * @returns 
+ */
 function generateConversationId(sender, recipient) {
     return sender.localeCompare(recipient) < 0
         ? `${sender.toLowerCase()}_${recipient.toLowerCase()}`
@@ -113,6 +123,10 @@ function onError() {
     connectingElement.style.color = 'red';
 }
 
+/**
+ * Affichage des messages reçus depuis l'historique de la base de données
+ * @param {*} messages 
+ */
 const displayAllOldMessages = (messages) => {
     console.log("Messages reçus pour l'historique :", messages);
     messages.sort((a, b) => {
@@ -126,6 +140,10 @@ const displayAllOldMessages = (messages) => {
     });
 };
 
+/**
+ * Envoi de smessages depuis le local storage ou depuis le front-end vers l'API
+ * @param {*} eventOrMessage 
+ */
 function sendMessage(eventOrMessage) {
     // Vérifier si eventOrMessage est un événement ou un message
     let messageContent;
@@ -138,7 +156,7 @@ function sendMessage(eventOrMessage) {
     } else {
         // Cas où la fonction est appelée avec un message depuis le cache
         isCachedMessage = true;
-        messageContent = eventOrMessage.content; // Contenu du message dans le cache
+        messageContent = eventOrMessage.content; 
     }
 
     if (messageContent && stompClient) {
@@ -175,6 +193,10 @@ function sendMessage(eventOrMessage) {
     }
 }
 
+/**
+ * Affichage des messages reçues de la web socket ou de la base de données
+ * @param {*} payload 
+ */
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
     console.log('Message reçu:', message);
@@ -200,8 +222,8 @@ function onMessageReceived(payload) {
 
     // Date et heure en gris et plus petit
     dateElement.textContent = formattedDateTime;
-    dateElement.style.fontSize = '0.8rem'; // Plus petit
-    dateElement.style.color = 'gray'; // Couleur grise pour la date
+    dateElement.style.fontSize = '0.8rem'; 
+    dateElement.style.color = 'gray'; 
 
     // Ajouter le nom de l'utilisateur et séparer de deux espaces
     usernameElement.appendChild(usernameText);
@@ -212,10 +234,8 @@ function onMessageReceived(payload) {
     spaceElement.textContent = '  '; // Deux espaces
     messageElement.appendChild(spaceElement);
 
-    // Ajouter la date et l'heure
     messageElement.appendChild(dateElement);
 
-    // Ajouter le texte du message
     var textElement = document.createElement('p');
     var messageText = document.createTextNode(message.content);
     textElement.appendChild(messageText);
@@ -226,8 +246,11 @@ function onMessageReceived(payload) {
     messageArea.scrollTop = messageArea.scrollHeight;
 }
 
-
-
+/**
+ * 
+ * @param {*} messageSender 
+ * @returns 
+ */
 function getAvatarColor(messageSender) {
     var hash = 0;
     for (var i = 0; i < messageSender.length; i++) {
@@ -237,6 +260,9 @@ function getAvatarColor(messageSender) {
     return colors[index];
 }
 
+/**
+ * Lorsque l'utilisateur se déconnecte, nous devons envoyer un message de déconnexion à la websocket
+ */
 const onDisconnect = async () => {
     if (stompClient) {
         const conversationId = generateConversationId(username, selectedUsername);
@@ -246,11 +272,11 @@ const onDisconnect = async () => {
             date: getCurrentDateTime().date,
             time: getCurrentDateTime().time
         }));
-
             stompClient.disconnect();
     }
     window.location.reload();
 }
+
 function getRelativeDate(messageDate) {
     const now = new Date();
     const messageDateObj = new Date(messageDate);
@@ -262,16 +288,16 @@ function getRelativeDate(messageDate) {
 
     // Formater la date du message
     if (messageDateObj >= today) {
-        return "Aujourd'hui";
+        return "Aujourd'hui à";
     } else if (messageDateObj >= yesterday) {
-        return "Hier";
+        return "Hier à";
     } else {
-        return messageDateObj.toLocaleDateString('fr-FR'); // Affiche la date au format standard
+        return messageDateObj.toLocaleDateString('fr-FR'); 
     }
 }
 function formatMessageDate(date, time) {
-    const relativeDate = getRelativeDate(date); // Utiliser la fonction que nous avons définie pour obtenir "Aujourd'hui" ou "Hier"
-    return `${relativeDate} ${time}`; // Retourne "Aujourd'hui 20:37"
+    const relativeDate = getRelativeDate(date); 
+    return `${relativeDate} ${time}`; 
 }
 usernameForm.addEventListener('submit', connect, true);
 messageForm.addEventListener('submit', sendMessage, true);

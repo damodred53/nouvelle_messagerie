@@ -1,4 +1,8 @@
 
+/**
+ * Fonction permettant la récupération de l'ensemble des utilisateurs pour le carnet d'adresse.
+ * @returns {Promise<Array>} - Une promesse résolue avec une liste de conversations.
+ */
 export const getAllUsers = async () => {
     try {
         const allUsersResponse = await fetch('/api/users');
@@ -8,7 +12,6 @@ export const getAllUsers = async () => {
     } catch (error) {
         console.error('Erreur lors de la récupération des utilisateurs:', error);
     }
-    
 }
 
 
@@ -48,6 +51,10 @@ function generateConversationId(sender, recipient) {
         : `${recipient.toLowerCase()}_${sender.toLowerCase()}`;
 }
 
+/**
+ * Enregistrement des messages dans le local storage en mode hors ligne
+ * @param {*} message 
+ */
 export function saveMessageToLocalStorage(message) {
     console.log('Enregistrement du message dans le cache local:', message);
     const cachedMessages = JSON.parse(localStorage.getItem("offlineMessages")) || [];
