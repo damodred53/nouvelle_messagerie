@@ -129,7 +129,7 @@ public class ChatController {
         } else {
 
             logService.insertLog(
-                    "L'utilisateur " + username + " est déjà présent en base de données, enregistrmeent annulé",
+                    "L'utilisateur " + username + " est déjà présent en base de données, enregistrement annulé",
                     "WARNING", "ChatController", "Controller");
 
             System.out.println("L'utilisateur existe déjà dans la base de données");
@@ -188,8 +188,8 @@ public class ChatController {
     }
 
     private boolean isUserAlreadySaved(String username) {
-        // Implémentez une méthode pour vérifier si l'utilisateur existe dans la base de
-        // données
+        // Implémentez une méthode pour vérifier si l'utilisateur existe dans la base de donnée
+
         return utilisateurRepository.existsByUsername(username); // Exemple avec un repository JPA
     }
 }

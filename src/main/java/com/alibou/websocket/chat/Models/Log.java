@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 public class Log {
-
+    //définis les propriétés d'un log
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

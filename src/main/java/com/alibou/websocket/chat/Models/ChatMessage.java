@@ -38,7 +38,7 @@ public class ChatMessage {
 
     @Column(nullable = false)
     private String conversationId;
-
+//définis les propriétés d'un message chat
     public ChatMessage(String sender, String recipient, String content, LocalDate date, LocalTime time) {
         this.sender = sender;
         this.recipient = recipient;
@@ -47,18 +47,9 @@ public class ChatMessage {
         this.time = time;
         this.conversationId = generateConversationId(sender, recipient);
     }
-
+// génère une conversation Id pour chaque message
     private String generateConversationId(String sender, String recipient) {
         // Ensure consistent ordering to guarantee a unique ID
         return (sender.compareToIgnoreCase(recipient) < 0) ? sender + "_" + recipient : recipient + "_" + sender;
     }
-
-    // public static class ChatMessageBuilder {
-    // private MessageType type;
-
-    // public ChatMessageBuilder type(MessageType type) {
-    // this.type = type;
-    // return this;
-    // }
-    // }
 }
