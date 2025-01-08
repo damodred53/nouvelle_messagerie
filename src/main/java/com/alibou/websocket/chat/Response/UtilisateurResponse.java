@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
+//définis les propriétés d'un UtilisateurResponse
 public class UtilisateurResponse {
     private String id;
     private String username;

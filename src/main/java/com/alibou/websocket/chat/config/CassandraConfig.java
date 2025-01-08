@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CassandraConfig {
 
+    //Mise en place du SqlSession pour LogService
     @Bean
     public CqlSession cqlSession() {
         return CqlSession.builder().build();

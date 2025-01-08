@@ -31,9 +31,9 @@ public class UtilisateurControlleur {
     @GetMapping
     public List<UtilisateurResponse> findAll() {
         log.debug("Finding all users ...");
-
+        // Insère un log personnalisé avec des informations sur cette opération.
         logService.insertLog("L'ensemble des utilisateurs ont été récupérés", "INFO", "ChatController", "Controller");
-
+        // Récupère tous les utilisateurs, les convertit en `UtilisateurResponse`
         return this.utilisateurRepository.findAll()
                 .stream()
                 .map(this::convert)
@@ -42,6 +42,8 @@ public class UtilisateurControlleur {
 
     private UtilisateurResponse convert(Utilisateur utilisateur) {
         UtilisateurResponse resp = UtilisateurResponse.builder().build();
+
+        // Copie les propriétés de l'objet `Utilisateur` dans l'objet UtilisateurResponse.
 
         BeanUtils.copyProperties(utilisateur, resp);
 
